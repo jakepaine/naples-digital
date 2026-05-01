@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { BrandFrame, Nav } from "@naples/ui";
+import { BrandFrame } from "@naples/ui";
 import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
@@ -28,10 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
         <BrandFrame>
-          <Nav active="dashboard" />
           <div className="flex">
             <Sidebar />
-            <div className="min-h-[calc(100vh-3.5rem)] flex-1 overflow-x-hidden">
+            <div className="min-h-screen flex-1 overflow-x-hidden">
               {children}
             </div>
           </div>
