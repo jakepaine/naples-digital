@@ -97,7 +97,7 @@ export async function getRoadmap(): Promise<typeof MOCK_ROADMAP> {
   if (error || !data || data.length < 3) return MOCK_ROADMAP;
   const byNum = (n: number): RoadmapPhase => {
     const r = data.find(d => d.phase_number === n)!;
-    return { label: r.label, items: r.items as RoadmapPhase["items"] };
+    return { label: r.label, items: r.items as unknown as RoadmapPhase["items"] };
   };
   return { phase1: byNum(1), phase2: byNum(2), phase3: byNum(3) };
 }

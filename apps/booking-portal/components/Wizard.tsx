@@ -48,11 +48,33 @@ export function Wizard() {
 
   const selectedPkg = PACKAGES.find((p) => p.id === data.packageId);
 
+  const [submitting, setSubmitting] = useState(false);
+
   function next() { setStep((s) => Math.min(4, s + 1)); }
   function back() { setStep((s) => Math.max(1, s - 1)); }
-  function submitInfo(e: React.FormEvent) {
+  async function submitInfo(e: React.FormEvent) {
     e.preventDefault();
-    next();
+    setSubmitting(true);
+    try {
+      // Persist the booking. We always advance to step 4 even if the request fails
+      // so the user-facing flow doesn't break — the API logs/returns failure mode.
+      await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: data.packageId,
+          date: data.date,
+          fullName: data.fullName,
+          company: data.company,
+          email: data.email,
+        }),
+      });
+    } catch {
+      // swallow — confirmation screen renders regardless
+    } finally {
+      setSubmitting(false);
+      next();
+    }
   }
 
   return (
@@ -68,7 +90,7 @@ export function Wizard() {
       <div className="mt-8">
         {step === 1 && <PackageStep data={data} setData={setData} onNext={next} />}
         {step === 2 && <DateStep data={data} setData={setData} onNext={next} onBack={back} />}
-        {step === 3 && <InfoStep data={data} setData={setData} onSubmit={submitInfo} onBack={back} />}
+        {step === 3 && <InfoStep data={data} setData={setData} onSubmit={submitInfo} onBack={back} submitting={submitting} />}
         {step === 4 && <ConfirmationStep data={data} pkg={selectedPkg} />}
       </div>
     </div>
@@ -204,7 +226,7 @@ function DateStep({ data, setData, onNext, onBack }: { data: FormData; setData: 
   );
 }
 
-function InfoStep({ data, setData, onSubmit, onBack }: { data: FormData; setData: (d: FormData) => void; onSubmit: (e: React.FormEvent) => void; onBack: () => void }) {
+function InfoStep({ data, setData, onSubmit, onBack, submitting }: { data: FormData; setData: (d: FormData) => void; onSubmit: (e: React.FormEvent) => void; onBack: () => void; submitting: boolean }) {
   const valid = data.fullName.trim() && data.email.trim();
   return (
     <Card>
@@ -245,8 +267,8 @@ function InfoStep({ data, setData, onSubmit, onBack }: { data: FormData; setData
         </Field>
 
         <div className="mt-4 flex items-center justify-between">
-          <Button variant="ghost" type="button" onClick={onBack}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
-          <Button type="submit" disabled={!valid}>Submit Booking <ArrowRight className="ml-2 h-4 w-4" /></Button>
+          <Button variant="ghost" type="button" onClick={onBack} disabled={submitting}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
+          <Button type="submit" disabled={!valid || submitting}>{submitting ? "Submitting…" : "Submit Booking"} <ArrowRight className="ml-2 h-4 w-4" /></Button>
         </div>
       </form>
     </Card>

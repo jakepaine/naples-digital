@@ -11,6 +11,7 @@
     "./types": "./lib/types.ts"
   },
   "dependencies": {
+    "@naples/mock-data": "workspace:*",
     "@supabase/supabase-js": "^2.45.4"
   },
   "devDependencies": {
