@@ -48,7 +48,9 @@ export async function POST(req: Request) {
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 1000,
+      // Three full email bodies routinely exceed the original 1000-token budget
+      // and got truncated mid-JSON — bumped to 2000 to keep the response valid.
+      max_tokens: 2000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
     });
