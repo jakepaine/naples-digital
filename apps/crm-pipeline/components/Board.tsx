@@ -14,11 +14,14 @@ import {
 } from "@dnd-kit/core";
 import { Card, Badge } from "@naples/ui";
 import { LEAD_STAGES, Lead, LeadStage } from "@naples/mock-data";
+import { Sparkles } from "lucide-react";
 import clsx from "clsx";
+import { AngleModal } from "./AngleModal";
 
 export function Board({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [angleLeadId, setAngleLeadId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   function handleStart(e: DragStartEvent) {
@@ -71,18 +74,30 @@ export function Board({ initialLeads }: { initialLeads: Lead[] }) {
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleStart} onDragEnd={handleEnd}>
         <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
           {LEAD_STAGES.map((stage) => (
-            <Column key={stage} stage={stage} leads={leads.filter((l) => l.stage === stage)} />
+            <Column
+              key={stage}
+              stage={stage}
+              leads={leads.filter((l) => l.stage === stage)}
+              onGenerateAngle={(id) => setAngleLeadId(id)}
+            />
           ))}
         </div>
         <DragOverlay>
           {activeId && <LeadCard lead={leads.find((l) => l.id === activeId)!} dragging />}
         </DragOverlay>
       </DndContext>
+
+      {angleLeadId && (
+        <AngleModal
+          lead={leads.find((l) => l.id === angleLeadId)!}
+          onClose={() => setAngleLeadId(null)}
+        />
+      )}
     </div>
   );
 }
 
-function Column({ stage, leads }: { stage: LeadStage; leads: Lead[] }) {
+function Column({ stage, leads, onGenerateAngle }: { stage: LeadStage; leads: Lead[]; onGenerateAngle?: (id: string) => void }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
   const total = leads.reduce((s, l) => s + l.value, 0);
   return (
@@ -102,14 +117,14 @@ function Column({ stage, leads }: { stage: LeadStage; leads: Lead[] }) {
       </div>
       <div className="min-h-[400px] space-y-2 p-3">
         {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
+          <LeadCard key={lead.id} lead={lead} onGenerateAngle={onGenerateAngle} />
         ))}
       </div>
     </div>
   );
 }
 
-function LeadCard({ lead, dragging }: { lead: Lead; dragging?: boolean }) {
+function LeadCard({ lead, dragging, onGenerateAngle }: { lead: Lead; dragging?: boolean; onGenerateAngle?: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: lead.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const hidden = isDragging && !dragging;
@@ -136,6 +151,19 @@ function LeadCard({ lead, dragging }: { lead: Lead; dragging?: boolean }) {
       </div>
       <div className="mt-2 flex items-center justify-between text-[10px] text-muted">
         <span>Day {lead.daysInStage}</span>
+        {onGenerateAngle && !dragging && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onGenerateAngle(lead.id);
+            }}
+            className="flex items-center gap-1 border border-card-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-gold/60 hover:text-gold"
+          >
+            <Sparkles className="h-3 w-3" /> Angle
+          </button>
+        )}
       </div>
     </div>
   );
