@@ -1,19 +1,24 @@
 "use client";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
-import { MOCK_MRR } from "@naples/mock-data";
 
-const DATA = [
-  { name: "Studio Rental", value: MOCK_MRR.studioRental },
-  { name: "Content Agency", value: MOCK_MRR.contentAgency },
-  { name: "Show Sponsors", value: MOCK_MRR.showSponsors },
-  { name: "Merch", value: MOCK_MRR.merch },
-];
+interface MrrShape {
+  studioRental: number;
+  contentAgency: number;
+  showSponsors: number;
+  merch: number;
+}
 
-export function RevenueBarChart() {
+export function RevenueBarChart({ mrr }: { mrr: MrrShape }) {
+  const data = [
+    { name: "Studio Rental", value: mrr.studioRental },
+    { name: "Content Agency", value: mrr.contentAgency },
+    { name: "Show Sponsors", value: mrr.showSponsors },
+    { name: "Merch", value: mrr.merch },
+  ];
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={DATA} margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
+        <BarChart data={data} margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
           <CartesianGrid stroke="#1F1F1F" vertical={false} />
           <XAxis
             dataKey="name"
@@ -40,7 +45,7 @@ export function RevenueBarChart() {
             formatter={(v: number) => [`$${v.toLocaleString()}`, "MRR"]}
           />
           <Bar dataKey="value" radius={[2, 2, 0, 0]}>
-            {DATA.map((_, i) => (
+            {data.map((_, i) => (
               <Cell key={i} fill="#C9A84C" />
             ))}
           </Bar>

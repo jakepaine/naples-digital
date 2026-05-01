@@ -1,26 +1,33 @@
 import { Card, Badge } from "@naples/ui";
 import { ProjectionChart } from "@/components/ProjectionChart";
-import { MOCK_MRR, MOCK_LEADS, PRICING } from "@naples/mock-data";
+import { SponsorList } from "@/components/SponsorList";
+import { PRICING } from "@naples/mock-data";
+import { getMrr, listLeads, getProjections, listSponsors } from "@naples/db";
 
-export default function RevenuePage() {
-  // Cost line items — Kevin pays platform stack at cost (~$460–690/mo).
-  // Labor for Naples Digital is the $3K retainer + 10% commission on new MRR.
+export const dynamic = "force-dynamic";
+
+export default async function RevenuePage() {
+  const [mrr, leads, projections, sponsors] = await Promise.all([
+    getMrr(), listLeads(), getProjections(), listSponsors(),
+  ]);
+
   const costs = [
     { label: "Platform Stack (GHL, Hosting, AI tools)", amount: 575 },
     { label: "Naples Digital Retainer", amount: 3000 },
     { label: "Studio Equipment Rental (optional)", amount: 1500 },
-    { label: "Naples Digital Commission (10% of new MRR)", amount: MOCK_MRR.naplesDigitalCommission },
+    { label: "Naples Digital Commission (10% of new MRR)", amount: mrr.naplesDigitalCommission },
   ];
   const totalCosts = costs.reduce((s, c) => s + c.amount, 0);
-  const netProfit = MOCK_MRR.total - totalCosts;
+  const netProfit = mrr.total - totalCosts;
 
-  // Active commission lines — leads that have closed (Client Won) drive ongoing commission.
-  const activeCommissionLines = MOCK_LEADS.filter((l) => l.stage === "Client Won").map((l) => ({
+  const activeCommissionLines = leads.filter((l) => l.stage === "Client Won").map((l) => ({
     name: l.name,
     type: l.goal,
     monthly: l.value,
     commission: Math.round(l.value * 0.10),
   }));
+
+  const sponsorAnalyticsBase = process.env.NEXT_PUBLIC_SPONSOR_ANALYTICS_URL || "";
 
   return (
     <main className="px-8 py-8">
@@ -37,14 +44,14 @@ export default function RevenuePage() {
           <div className="mt-6">
             <div className="text-[11px] uppercase tracking-wider text-emerald">Revenue</div>
             <div className="mt-2 space-y-2 text-sm">
-              <Line label="Studio Rental" value={MOCK_MRR.studioRental} />
-              <Line label="Content Agency" value={MOCK_MRR.contentAgency} />
-              <Line label="Show Sponsors" value={MOCK_MRR.showSponsors} />
-              <Line label="Merch" value={MOCK_MRR.merch} />
+              <Line label="Studio Rental" value={mrr.studioRental} />
+              <Line label="Content Agency" value={mrr.contentAgency} />
+              <Line label="Show Sponsors" value={mrr.showSponsors} />
+              <Line label="Merch" value={mrr.merch} />
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-card-border pt-3 text-sm">
               <span className="text-cream">Total Revenue</span>
-              <span className="font-heading text-xl text-cream">${MOCK_MRR.total.toLocaleString()}</span>
+              <span className="font-heading text-xl text-cream">${mrr.total.toLocaleString()}</span>
             </div>
           </div>
           <div className="mt-6">
@@ -81,7 +88,7 @@ export default function RevenuePage() {
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-card-border pt-3">
               <span className="text-sm text-muted">This month total</span>
-              <span className="font-heading text-2xl text-gold">${MOCK_MRR.naplesDigitalCommission.toLocaleString()}</span>
+              <span className="font-heading text-2xl text-gold">${mrr.naplesDigitalCommission.toLocaleString()}</span>
             </div>
           </Card>
 
@@ -105,6 +112,10 @@ export default function RevenuePage() {
       </section>
 
       <section className="mt-6">
+        <SponsorList sponsors={sponsors} baseUrl={sponsorAnalyticsBase} />
+      </section>
+
+      <section className="mt-6">
         <Card>
           <div className="flex items-end justify-between">
             <div>
@@ -114,7 +125,7 @@ export default function RevenuePage() {
             <Badge tone="gold">Realistic case · $62K MRR by Month 12</Badge>
           </div>
           <div className="mt-6">
-            <ProjectionChart />
+            <ProjectionChart data={projections} />
           </div>
         </Card>
       </section>

@@ -1,12 +1,12 @@
 "use client";
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
-import { MOCK_PROJECTIONS } from "@naples/mock-data";
+import type { Projection } from "@naples/mock-data";
 
-export function ProjectionChart() {
+export function ProjectionChart({ data }: { data: Projection[] }) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={MOCK_PROJECTIONS} margin={{ top: 12, right: 24, bottom: 8, left: 0 }}>
+        <LineChart data={data} margin={{ top: 12, right: 24, bottom: 8, left: 0 }}>
           <CartesianGrid stroke="#1F1F1F" vertical={false} />
           <XAxis
             dataKey="month"

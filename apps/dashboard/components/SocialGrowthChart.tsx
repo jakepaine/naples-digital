@@ -1,6 +1,6 @@
 "use client";
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
-import { MOCK_SOCIAL_GROWTH } from "@naples/mock-data";
+import type { SocialPoint } from "@naples/mock-data";
 
 const COLORS = {
   youtube: "#C25E5E",
@@ -9,11 +9,11 @@ const COLORS = {
   facebook: "#4F7DB8",
 };
 
-export function SocialGrowthChart() {
+export function SocialGrowthChart({ data }: { data: SocialPoint[] }) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={MOCK_SOCIAL_GROWTH} margin={{ top: 12, right: 24, bottom: 8, left: 0 }}>
+        <LineChart data={data} margin={{ top: 12, right: 24, bottom: 8, left: 0 }}>
           <CartesianGrid stroke="#1F1F1F" vertical={false} />
           <XAxis
             dataKey="week"

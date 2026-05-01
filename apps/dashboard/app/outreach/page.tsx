@@ -1,9 +1,14 @@
 import { Card, Button } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
-import { OUTREACH_STATS, APP_URLS } from "@naples/mock-data";
+import { APP_URLS } from "@naples/mock-data";
+import { getOutreachStats } from "@naples/db";
 import { Mail, Eye, Reply, CalendarCheck, ExternalLink } from "lucide-react";
 
-export default function OutreachPage() {
+export const dynamic = "force-dynamic";
+
+export default async function OutreachPage() {
+  const stats = await getOutreachStats();
+  const sent = Math.max(stats.emailsSentThisWeek, 1); // avoid divide-by-zero
   return (
     <main className="px-8 py-8">
       <header className="mb-6 flex items-end justify-between">
@@ -20,10 +25,10 @@ export default function OutreachPage() {
       </header>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <Kpi label="Emails Sent (this week)" value={String(OUTREACH_STATS.emailsSentThisWeek)} icon={<Mail className="h-4 w-4" />} hint="across 3 sequences" />
-        <Kpi label="Opens" value={String(OUTREACH_STATS.opens)} icon={<Eye className="h-4 w-4" />} hint={`${Math.round((OUTREACH_STATS.opens / OUTREACH_STATS.emailsSentThisWeek) * 100)}% open rate`} />
-        <Kpi label="Replies" value={String(OUTREACH_STATS.replies)} icon={<Reply className="h-4 w-4" />} hint={`${((OUTREACH_STATS.replies / OUTREACH_STATS.emailsSentThisWeek) * 100).toFixed(1)}% reply rate`} />
-        <Kpi label="Meetings Booked" value={String(OUTREACH_STATS.meetingsBooked)} icon={<CalendarCheck className="h-4 w-4" />} hint="qualified · this week" delta={{ value: "Coastal Financial", tone: "neutral" }} />
+        <Kpi label="Emails Sent (this week)" value={String(stats.emailsSentThisWeek)} icon={<Mail className="h-4 w-4" />} hint="across 3 sequences" />
+        <Kpi label="Opens" value={String(stats.opens)} icon={<Eye className="h-4 w-4" />} hint={`${Math.round((stats.opens / sent) * 100)}% open rate`} />
+        <Kpi label="Replies" value={String(stats.replies)} icon={<Reply className="h-4 w-4" />} hint={`${((stats.replies / sent) * 100).toFixed(1)}% reply rate`} />
+        <Kpi label="Meetings Booked" value={String(stats.meetingsBooked)} icon={<CalendarCheck className="h-4 w-4" />} hint="qualified · this week" delta={{ value: "Coastal Financial", tone: "neutral" }} />
       </section>
 
       <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">

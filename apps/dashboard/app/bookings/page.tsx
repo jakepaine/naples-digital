@@ -1,13 +1,16 @@
 import { Card, Badge } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
-import { MOCK_BOOKINGS } from "@naples/mock-data";
+import { listBookings } from "@naples/db";
 import { CalendarCheck, CircleDollarSign, TrendingUp } from "lucide-react";
 
-export default function BookingsPage() {
-  const total = MOCK_BOOKINGS.reduce((s, b) => s + b.revenue, 0);
-  const monthBookings = MOCK_BOOKINGS.filter((b) => b.date.startsWith("2025-05"));
+export const dynamic = "force-dynamic";
+
+export default async function BookingsPage() {
+  const bookings = await listBookings();
+  const total = bookings.reduce((s, b) => s + b.revenue, 0);
+  const monthBookings = bookings.filter((b) => b.date.startsWith("2025-05"));
   const monthTotal = monthBookings.reduce((s, b) => s + b.revenue, 0);
-  const avg = Math.round(total / MOCK_BOOKINGS.length);
+  const avg = bookings.length ? Math.round(total / bookings.length) : 0;
 
   return (
     <main className="px-8 py-8">
@@ -50,7 +53,7 @@ export default function BookingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_BOOKINGS.map((b) => (
+                {bookings.map((b) => (
                   <tr key={b.id} className="border-b border-card-border/50 hover:bg-card-border/20">
                     <td className="py-3 pr-4 text-cream">{b.client}</td>
                     <td className="py-3 pr-4 text-muted">{b.package}</td>

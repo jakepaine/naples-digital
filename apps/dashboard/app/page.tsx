@@ -2,24 +2,24 @@ import { Card, Badge } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
 import { RevenueBarChart } from "@/components/RevenueBarChart";
 import { SocialGrowthChart } from "@/components/SocialGrowthChart";
-import {
-  MOCK_BOOKINGS,
-  MOCK_LEADS,
-  MOCK_MRR,
-  MOCK_ROADMAP,
-  LEAD_STAGES,
-} from "@naples/mock-data";
+import { LEAD_STAGES } from "@naples/mock-data";
+import { listBookings, listLeads, getMrr, getRoadmap, getSocialGrowth } from "@naples/db";
 import { CircleDollarSign, Users, CalendarCheck, TrendingUp, CheckCircle2, Circle } from "lucide-react";
 
-export default function OverviewPage() {
-  const recent = MOCK_BOOKINGS.slice(0, 5);
+export const dynamic = "force-dynamic";
+
+export default async function OverviewPage() {
+  const [bookings, leads, mrr, roadmap, social] = await Promise.all([
+    listBookings(), listLeads(), getMrr(), getRoadmap(), getSocialGrowth(),
+  ]);
+  const recent = bookings.slice(0, 5);
 
   const stageCounts = LEAD_STAGES.map((stage) => ({
     stage,
-    count: MOCK_LEADS.filter((l) => l.stage === stage).length,
-    total: MOCK_LEADS.filter((l) => l.stage === stage).reduce((s, l) => s + l.value, 0),
+    count: leads.filter((l) => l.stage === stage).length,
+    total: leads.filter((l) => l.stage === stage).reduce((s, l) => s + l.value, 0),
   }));
-  const maxStageCount = Math.max(...stageCounts.map((s) => s.count));
+  const maxStageCount = Math.max(...stageCounts.map((s) => s.count), 1);
 
   return (
     <main className="px-8 py-8">
@@ -39,7 +39,7 @@ export default function OverviewPage() {
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Kpi
           label="Total MRR"
-          value={`$${MOCK_MRR.total.toLocaleString()}`}
+          value={`$${mrr.total.toLocaleString()}`}
           delta={{ value: "+$19,500 vs. 3 months ago", tone: "up" }}
           icon={<CircleDollarSign className="h-4 w-4" />}
         />
@@ -51,13 +51,13 @@ export default function OverviewPage() {
         />
         <Kpi
           label="Leads in Pipeline"
-          value={String(MOCK_LEADS.length)}
+          value={String(leads.length)}
           hint="across 5 stages"
           icon={<TrendingUp className="h-4 w-4" />}
         />
         <Kpi
           label="ND Commission This Month"
-          value={`$${MOCK_MRR.naplesDigitalCommission.toLocaleString()}`}
+          value={`$${mrr.naplesDigitalCommission.toLocaleString()}`}
           hint="Naples Digital · 10% of new"
           icon={<CalendarCheck className="h-4 w-4" />}
         />
@@ -71,10 +71,10 @@ export default function OverviewPage() {
               <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Revenue Breakdown</div>
               <h2 className="mt-1 font-heading text-2xl text-cream">Monthly Recurring Revenue</h2>
             </div>
-            <Badge tone="gold">Live · {`$${MOCK_MRR.total.toLocaleString()}/mo`}</Badge>
+            <Badge tone="gold">Live · {`$${mrr.total.toLocaleString()}/mo`}</Badge>
           </div>
           <div className="mt-6">
-            <RevenueBarChart />
+            <RevenueBarChart mrr={mrr} />
           </div>
         </Card>
       </section>
@@ -148,7 +148,7 @@ export default function OverviewPage() {
             <Badge tone="emerald">+172% audience trailing 90d</Badge>
           </div>
           <div className="mt-6">
-            <SocialGrowthChart />
+            <SocialGrowthChart data={social} />
           </div>
         </Card>
       </section>
@@ -159,7 +159,7 @@ export default function OverviewPage() {
           <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Build Plan</div>
           <h2 className="mt-1 font-heading text-2xl text-cream">90-Day Roadmap Progress</h2>
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {[MOCK_ROADMAP.phase1, MOCK_ROADMAP.phase2, MOCK_ROADMAP.phase3].map((phase) => {
+            {[roadmap.phase1, roadmap.phase2, roadmap.phase3].map((phase) => {
               const done = phase.items.filter((i) => i.done).length;
               const pct = (done / phase.items.length) * 100;
               return (

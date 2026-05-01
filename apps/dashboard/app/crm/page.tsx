@@ -1,10 +1,14 @@
 import { Card, Badge, Button } from "@naples/ui";
-import { MOCK_LEADS, LEAD_STAGES, APP_URLS } from "@naples/mock-data";
+import { LEAD_STAGES, APP_URLS } from "@naples/mock-data";
+import { listLeads } from "@naples/db";
 import { ExternalLink } from "lucide-react";
 
-export default function CrmPage() {
-  const totalPipeline = MOCK_LEADS.reduce((s, l) => s + l.value, 0);
-  const won = MOCK_LEADS.filter((l) => l.stage === "Client Won");
+export const dynamic = "force-dynamic";
+
+export default async function CrmPage() {
+  const leads = await listLeads();
+  const totalPipeline = leads.reduce((s, l) => s + l.value, 0);
+  const won = leads.filter((l) => l.stage === "Client Won");
   const wonValue = won.reduce((s, l) => s + l.value, 0);
 
   return (
@@ -23,14 +27,14 @@ export default function CrmPage() {
       </header>
 
       <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard label="Total Pipeline Value" value={`$${totalPipeline.toLocaleString()}`} sub="14 leads · 5 stages" />
+        <StatCard label="Total Pipeline Value" value={`$${totalPipeline.toLocaleString()}`} sub={`${leads.length} leads · 5 stages`} />
         <StatCard label="Won This Month" value={`$${wonValue.toLocaleString()}`} sub={`${won.length} clients signed`} tone="emerald" />
         <StatCard label="Commission Earned" value={`$${Math.round(wonValue * 0.10).toLocaleString()}`} sub="Naples Digital · 10%" tone="gold" />
       </section>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
         {LEAD_STAGES.map((stage) => {
-          const stageLeads = MOCK_LEADS.filter((l) => l.stage === stage);
+          const stageLeads = leads.filter((l) => l.stage === stage);
           const stageTotal = stageLeads.reduce((s, l) => s + l.value, 0);
           return (
             <div key={stage} className="border border-card-border bg-card">

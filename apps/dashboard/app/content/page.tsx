@@ -1,6 +1,9 @@
 import { Card, Badge, Button } from "@naples/ui";
-import { MOCK_EPISODES, APP_URLS } from "@naples/mock-data";
+import { APP_URLS } from "@naples/mock-data";
+import { listEpisodes } from "@naples/db";
 import { ExternalLink, Instagram, Youtube, Facebook, Music2 } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 const STATUS_TONE = {
   Scheduled: "muted",
@@ -12,7 +15,8 @@ const STATUS_TONE = {
   Draft: "muted",
 } as const;
 
-export default function ContentPage() {
+export default async function ContentPage() {
+  const episodes = await listEpisodes();
   return (
     <main className="px-8 py-8">
       <header className="mb-6 flex items-end justify-between">
@@ -31,12 +35,12 @@ export default function ContentPage() {
       <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Episodes in Production</div>
-          <div className="mt-2 font-heading text-3xl text-cream">{MOCK_EPISODES.length}</div>
+          <div className="mt-2 font-heading text-3xl text-cream">{episodes.length}</div>
           <div className="mt-1 text-xs text-muted">3 shows · this month</div>
         </Card>
         <Card>
           <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Clips Posted</div>
-          <div className="mt-2 font-heading text-3xl text-gold">{MOCK_EPISODES.reduce((s, e) => s + e.clipsPosted, 0)}</div>
+          <div className="mt-2 font-heading text-3xl text-gold">{episodes.reduce((s, e) => s + e.clipsPosted, 0)}</div>
           <div className="mt-1 text-xs text-muted">across all platforms</div>
         </Card>
         <Card>
@@ -68,7 +72,7 @@ export default function ContentPage() {
               </tr>
             </thead>
             <tbody>
-              {MOCK_EPISODES.map((ep) => (
+              {episodes.map((ep) => (
                 <tr key={ep.id} className="border-b border-card-border/50 hover:bg-card-border/20">
                   <td className="py-3 pr-4 text-gold">{ep.show}</td>
                   <td className="py-3 pr-4 text-cream">{ep.title}</td>
