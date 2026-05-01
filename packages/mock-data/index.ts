@@ -220,12 +220,15 @@ export const PRICING = {
   equipmentRental: 1500,
 };
 
+// Production Railway URLs hardcoded as defaults so cross-app links work even
+// when NEXT_PUBLIC_*_URL env vars aren't forwarded into the Docker build at
+// Railway build time. Override via env var for local dev.
 export const APP_URLS = {
-  site: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-  booking: process.env.NEXT_PUBLIC_BOOKING_URL || "http://localhost:3001",
-  dashboard: process.env.NEXT_PUBLIC_DASHBOARD_URL || "http://localhost:3002",
-  agency: process.env.NEXT_PUBLIC_AGENCY_URL || "http://localhost:3003",
-  outreach: process.env.NEXT_PUBLIC_OUTREACH_URL || "http://localhost:3004",
-  crm: process.env.NEXT_PUBLIC_CRM_URL || "http://localhost:3005",
-  content: process.env.NEXT_PUBLIC_CONTENT_URL || "http://localhost:3006",
+  site: process.env.NEXT_PUBLIC_SITE_URL || "https://239live-site-production.up.railway.app",
+  booking: process.env.NEXT_PUBLIC_BOOKING_URL || "https://booking-portal-production-883f.up.railway.app",
+  dashboard: process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://dashboard-production-b08f.up.railway.app",
+  agency: process.env.NEXT_PUBLIC_AGENCY_URL || "https://agency-site-production-35a2.up.railway.app",
+  outreach: process.env.NEXT_PUBLIC_OUTREACH_URL || "https://outreach-demo-production.up.railway.app",
+  crm: process.env.NEXT_PUBLIC_CRM_URL || "https://crm-pipeline-production.up.railway.app",
+  content: process.env.NEXT_PUBLIC_CONTENT_URL || "https://content-pipeline-production-21b7.up.railway.app",
 };
