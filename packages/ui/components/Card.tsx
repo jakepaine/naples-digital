@@ -3,6 +3,7 @@ import clsx from "clsx";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
+  /** Show the red top "live" rule. Defaults to true. Legacy prop name kept for compat. */
   goldRule?: boolean;
 }
 
@@ -11,7 +12,8 @@ export function Card({ children, goldRule = true, className, ...rest }: CardProp
     <div
       className={clsx(
         "relative bg-card",
-        goldRule && "border-t border-gold",
+        // Red top rule = the broadcast "live" indicator on every surface
+        goldRule && "border-t-2 border-live",
         "border-x border-b border-card-border",
         "p-6",
         className

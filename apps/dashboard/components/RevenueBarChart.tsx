@@ -33,20 +33,20 @@ export function RevenueBarChart({ mrr }: { mrr: MrrShape }) {
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
           />
           <Tooltip
-            cursor={{ fill: "rgba(201, 168, 76, 0.08)" }}
+            cursor={{ fill: "rgba(232, 25, 44, 0.08)" }}
             contentStyle={{
               background: "#0A0A0A",
-              border: "1px solid #C9A84C",
+              border: "1px solid #E8192C",
               borderRadius: 0,
               fontSize: 12,
             }}
-            labelStyle={{ color: "#F5EDD8" }}
-            itemStyle={{ color: "#C9A84C" }}
+            labelStyle={{ color: "#F5F5F5" }}
+            itemStyle={{ color: "#E8192C" }}
             formatter={(v: number) => [`$${v.toLocaleString()}`, "MRR"]}
           />
           <Bar dataKey="value" radius={[2, 2, 0, 0]}>
             {data.map((_, i) => (
-              <Cell key={i} fill="#C9A84C" />
+              <Cell key={i} fill="#E8192C" />
             ))}
           </Bar>
         </BarChart>

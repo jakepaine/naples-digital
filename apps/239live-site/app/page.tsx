@@ -9,7 +9,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-card-border">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-card/60 to-bg" />
-        <div className="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,#C9A84C_1px,transparent_0)] [background-size:32px_32px]" />
+        <div className="absolute inset-0 -z-10 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,#E8192C_1px,transparent_0)] [background-size:32px_32px]" />
         <div className="mx-auto max-w-7xl px-6 py-24 md:py-36">
           <div className="text-[10px] uppercase tracking-[0.32em] text-gold">239 Live Studios · Naples, FL</div>
           <h1 className="mt-5 max-w-4xl font-heading text-5xl leading-[1.05] text-cream md:text-7xl lg:text-[88px]">

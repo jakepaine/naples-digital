@@ -4,8 +4,8 @@ import type { SocialPoint } from "@naples/mock-data";
 
 const COLORS = {
   youtube: "#C25E5E",
-  instagram: "#C9A84C",
-  tiktok: "#F5EDD8",
+  instagram: "#E8192C",
+  tiktok: "#F5F5F5",
   facebook: "#4F7DB8",
 };
 
@@ -27,8 +27,8 @@ export function SocialGrowthChart({ data }: { data: SocialPoint[] }) {
             tickLine={false}
           />
           <Tooltip
-            contentStyle={{ background: "#0A0A0A", border: "1px solid #C9A84C", borderRadius: 0, fontSize: 12 }}
-            labelStyle={{ color: "#F5EDD8" }}
+            contentStyle={{ background: "#0A0A0A", border: "1px solid #E8192C", borderRadius: 0, fontSize: 12 }}
+            labelStyle={{ color: "#F5F5F5" }}
           />
           <Legend
             iconType="line"

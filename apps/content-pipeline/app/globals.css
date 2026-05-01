@@ -5,17 +5,17 @@
 html,
 body {
   background: #0A0A0A;
-  color: #F5EDD8;
+  color: #F5F5F5;
   font-feature-settings: "ss01", "ss02";
 }
 
 ::selection {
-  background: rgba(201, 168, 76, 0.35);
-  color: #F5EDD8;
+  background: rgba(232, 25, 44, 0.35);
+  color: #F5F5F5;
 }
 
-/* Subtle gold scrollbar */
+/* Live red scrollbar accent */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #0A0A0A; }
 ::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #C9A84C; }
+::-webkit-scrollbar-thumb:hover { background: #E8192C; }
