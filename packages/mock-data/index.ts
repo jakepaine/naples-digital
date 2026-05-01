@@ -234,4 +234,5 @@ export const APP_URLS = {
   content: process.env.NEXT_PUBLIC_CONTENT_URL || "https://content-pipeline-production-21b7.up.railway.app",
   sponsorPitch: process.env.NEXT_PUBLIC_SPONSOR_PITCH_URL || "https://sponsor-pitch-production.up.railway.app",
   sponsorAnalytics: process.env.NEXT_PUBLIC_SPONSOR_ANALYTICS_URL || "https://sponsor-analytics-production.up.railway.app",
+  clientPortal: process.env.NEXT_PUBLIC_CLIENT_PORTAL_URL || "https://client-portal-production-0b14.up.railway.app",
 };
