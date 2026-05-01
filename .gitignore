@@ -37,6 +37,9 @@ Thumbs.db
 # Railway
 .railway
 
+# Claude Code session data
+.claude/
+
 # Coverage
 coverage
 .nyc_output
