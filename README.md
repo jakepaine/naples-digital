@@ -1,18 +1,20 @@
 # Naples Digital × 239 Live System
 
-A connected mockup demo system showing what Naples Digital builds for 239 Live Studios. Seven Next.js 14 apps in a pnpm + Turborepo monorepo, each deployed as its own Railway service, all sharing brand and mock data.
+A connected demo + production system showing what Naples Digital builds for 239 Live Studios. **Nine** Next.js 14 apps in a pnpm + Turborepo monorepo, each deployed as its own Railway service, all backed by a real Supabase Postgres database, all sharing the same brand. Four AI features ship as real products powered by Claude Sonnet 4.6 (with deterministic mock fallbacks if no API key).
 
 ## Live URLs
 
 | App | URL | What it is |
 |---|---|---|
 | **239live-site** | https://239live-site-production.up.railway.app | Public-facing studio website (home, studio, shows, book) |
-| **booking-portal** | https://booking-portal-production-883f.up.railway.app | 4-step booking wizard for studio sessions |
-| **dashboard** | https://dashboard-production-b08f.up.railway.app | Kevin's operations hub — KPIs, bookings, CRM, content, revenue, outreach |
-| **outreach-demo** | https://outreach-demo-production.up.railway.app | Live AI email generator (Claude Sonnet 4.6) — the closer |
-| **crm-pipeline** | https://crm-pipeline-production.up.railway.app | Drag-and-drop kanban with 14 mock leads |
-| **content-pipeline** | https://content-pipeline-production-21b7.up.railway.app | Episode tracker, distribution grid, guest intake |
+| **booking-portal** | https://booking-portal-production-883f.up.railway.app | 4-step booking wizard — submissions persist to `bookings` |
+| **dashboard** | https://dashboard-production-b08f.up.railway.app | Kevin's operations hub — every chart and KPI reads from Supabase |
+| **outreach-demo** | https://outreach-demo-production.up.railway.app | Live AI email generator — every run logs to `outreach_runs` |
+| **crm-pipeline** | https://crm-pipeline-production.up.railway.app | Drag-and-drop kanban + ✨ AI "generate angle" on every card |
+| **content-pipeline** | https://content-pipeline-production-21b7.up.railway.app | Episode tracker + 🎬 AI clip generator (5 clips per episode) |
 | **agency-site** | https://agency-site-production-35a2.up.railway.app | Naples Digital's own marketing site |
+| **sponsor-pitch** | https://sponsor-pitch-production.up.railway.app | AI sponsor one-pager builder — pitch any company in 30s |
+| **sponsor-analytics** | https://sponsor-analytics-production.up.railway.app | Per-sponsor private analytics portal at `/s/<magic-link-token>` |
 
 ## Architecture
 
@@ -67,13 +69,24 @@ Copy `.env.example` to `.env.local` in any app that needs custom values. Most ap
 
 The only secret used in production is `ANTHROPIC_API_KEY` for the outreach-demo. **If unset, the app falls through to a deterministic template generator that produces realistic-looking emails so the screen never breaks.**
 
-## Outreach demo notes
+## AI features (Phase 6)
 
-- Model: `claude-sonnet-4-6` (current Claude Sonnet as of April 2026)
-- Max tokens: 1000
-- Source badge on output indicates whether the response came from the real API, the deterministic template, or a fallback after API failure
+Four AI features ship as real products. All four use Claude Sonnet 4.6 via the Anthropic SDK and fall back to deterministic mock generators if `ANTHROPIC_API_KEY` is unset (the screen looks identical either way; a small badge indicates "Live · Claude Sonnet 4.6" vs. "Preview mode").
 
-The original spec called for `claude-sonnet-4-20250514` (May 2024 Sonnet), which has been retired. Substituted with the current Sonnet — see comment at the top of `apps/outreach-demo/app/api/generate/route.ts`.
+| Feature | App | API route | Persists to |
+|---|---|---|---|
+| 3-email cold outreach sequences | outreach-demo | `/api/generate` | `outreach_runs` |
+| Per-lead intelligence: summary + 3 hooks + draft DM | crm-pipeline | `/api/leads/[id]/angle` | `leads.ai_angle` (cache) |
+| Per-episode short-form clips (5 platforms) | content-pipeline | `/api/episodes/[id]/clips` | `clips` |
+| Sponsor one-pager: audience match + 3 tiers + 5 ideas | sponsor-pitch | `/api/generate` | `sponsor_pitches` |
+
+The sponsor-analytics portal is the only post-AI app — it consumes the `sponsor_metrics` rows that real-world integrations would populate (in production, weekly cron from IG/TT/YT APIs writes new rows; for now the demo sponsor "Naples Yacht Club" has 12 weeks of seeded metrics).
+
+### Outreach demo notes
+
+- Model: `claude-sonnet-4-6` (current Claude Sonnet)
+- Max tokens: 2000 (three full email bodies routinely exceeded the original 1000)
+- The original spec called for `claude-sonnet-4-20250514` (May 2024 Sonnet, retired) — substituted with the current Sonnet, see comment at the top of `apps/outreach-demo/app/api/generate/route.ts`.
 
 ## Deployment
 
@@ -94,22 +107,25 @@ ANTHROPIC_API_KEY=sk-ant-... bash scripts/sync-env.sh
 
 ## Connecting to real systems
 
-This demo runs entirely on hardcoded mock data. To wire it up to production:
+### Real database (Supabase) — DONE ✓
 
-### Real CRM (GoHighLevel)
-- Replace `MOCK_LEADS` in `packages/mock-data/index.ts` with `fetch()` calls to GoHighLevel's REST API
+The system runs on a live Supabase Postgres (project `239Live` / ref `ylqoxefiwwimzxeuzfxy`). 13 tables live in the `public` schema with RLS enabled:
+
+- `bookings`, `leads`, `episodes`, `mrr`, `outreach_stats`, `social_growth`, `projections`, `roadmap_phases` — mirror the original `MOCK_*` shapes
+- `outreach_runs`, `clips`, `sponsors`, `sponsor_metrics`, `sponsor_pitches` — back the four AI features
+
+All reads/writes go through `@naples/db` workspace package via the service-role key in API routes (RLS bypassed server-side; no anon access). Queries fall back to `MOCK_*` exports if the Supabase env is missing — so the apps still render in dev without keys.
+
+### Anthropic — DONE ✓
+
+Wired into outreach-demo, crm-pipeline (lead intelligence), content-pipeline (clip generator), and sponsor-pitch. Each call falls back to a deterministic mock generator if `ANTHROPIC_API_KEY` is unset, so the live demo never breaks.
+
+### Real CRM (GoHighLevel) — future
+
+When Kevin moves off Supabase-as-CRM onto GHL:
+- Replace the `leads` table reads in `@naples/db` queries with GHL REST calls
 - Add `GHL_API_KEY` and `GHL_LOCATION_ID` to each app's Railway env vars
-- Wire booking-portal Step 4 submission to POST a new contact + opportunity
-- Wire content-pipeline guest intake form similarly
-
-### Real database (Supabase)
-- Replace each `MOCK_*` export with a Supabase query (`supabase.from(...).select()`)
-- Use Supabase Auth for the dashboard's gating (currently anyone can view)
-- Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to Railway env vars
-- Mock data files become reasonable seed scripts
-
-### Anthropic
-- Already wired in the outreach-demo. Just need the key set on the Railway service.
+- The kanban already PATCHes lead stage on drag — pointing it at GHL is a swap of the `updateLeadStage` implementation, not the UI
 
 ## Cost breakdown (what Kevin pays)
 
