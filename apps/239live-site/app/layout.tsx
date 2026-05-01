@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { BrandFrame, Nav } from "@naples/ui";
+import { BrandFrame } from "@naples/ui";
+import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
 const heading = Bebas_Neue({
@@ -18,8 +19,8 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "239 Live System",
-  description: "Naples Digital × 239 Live — Southwest Florida's Media Home",
+  title: "239 Live — Naples' Premier Podcast & Broadcasting Studio",
+  description: "Record Bold. Stream Live. Build Your Brand. Make Noise.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
         <BrandFrame>
-          <Nav active="site" />
+          <SiteNav />
           {children}
         </BrandFrame>
       </body>
