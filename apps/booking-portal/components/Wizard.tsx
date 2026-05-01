@@ -96,10 +96,21 @@ export function Wizard() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <header className="text-center">
-        <div className="text-[10px] uppercase tracking-[0.32em] text-gold">239 Live Studios</div>
-        <h1 className="mt-3 font-heading text-4xl text-cream md:text-5xl">Book a Session</h1>
-        <div className="mx-auto mt-3 h-px w-16 bg-gold" />
+      <header className="flex flex-col items-center text-center">
+        <div className="flex items-center gap-3">
+          <span className="relative inline-flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-live-pulse rounded-full bg-live opacity-90" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-live" />
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.32em] text-live">239 Live Studios</span>
+        </div>
+        <h1 className="mt-5 font-heading text-5xl tracking-broadcast text-cream md:text-6xl">
+          Book A <span className="text-live">Session</span>
+        </h1>
+        <div className="mt-4 h-px w-16 bg-live" />
+        <p className="mt-4 max-w-md text-sm text-cream/70">
+          Pick a package. Pick a time. We'll confirm in two hours.
+        </p>
       </header>
 
       <ProgressBar step={step} />
@@ -128,16 +139,16 @@ function ProgressBar({ step }: { step: number }) {
                 <div
                   className={clsx(
                     "flex h-7 w-7 shrink-0 items-center justify-center border text-[11px] font-medium transition-colors",
-                    active ? "border-gold bg-gold text-bg" : "border-card-border text-muted"
+                    active ? "border-live bg-live text-bg" : "border-card-border text-muted"
                   )}
                 >
                   {num}
                 </div>
                 {i < 3 && (
-                  <div className={clsx("ml-2 h-px flex-1", num < step ? "bg-gold" : "bg-card-border")} />
+                  <div className={clsx("ml-2 h-px flex-1", num < step ? "bg-live" : "bg-card-border")} />
                 )}
               </div>
-              <div className={clsx("mt-2 text-[10px] uppercase tracking-wider", active ? "text-gold" : "text-muted")}>
+              <div className={clsx("mt-2 text-[10px] uppercase tracking-wider", active ? "text-live" : "text-muted")}>
                 {label}
               </div>
             </div>
@@ -164,15 +175,15 @@ function PackageStep({ data, setData, onNext }: { data: FormData; setData: (d: F
               onClick={() => setData({ ...data, packageId: p.id })}
               className={clsx(
                 "border p-4 text-left transition-colors",
-                selected ? "border-gold bg-gold/5" : "border-card-border bg-bg hover:border-gold/40"
+                selected ? "border-live bg-live/5" : "border-card-border bg-bg hover:border-live/40"
               )}
             >
               <div className="flex items-center justify-between">
-                <Icon className={clsx("h-5 w-5", selected ? "text-gold" : "text-muted")} />
-                {selected && <CheckCircle2 className="h-4 w-4 text-gold" />}
+                <Icon className={clsx("h-5 w-5", selected ? "text-live" : "text-muted")} />
+                {selected && <CheckCircle2 className="h-4 w-4 text-live" />}
               </div>
               <div className="mt-3 font-heading text-lg text-cream">{p.name}</div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider text-gold">{p.price}</div>
+              <div className="mt-1 text-[11px] uppercase tracking-wider text-live">{p.price}</div>
               <div className="mt-2 text-xs text-cream/70">{p.desc}</div>
             </button>
           );
@@ -198,11 +209,11 @@ function DateStep({ data, setData, onNext, onBack }: { data: FormData; setData: 
       <div className="mt-2 flex items-center gap-4 text-[11px] text-muted">
         <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-emerald" /> Available</span>
         <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-rose" /> Booked</span>
-        <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-gold" /> Selected</span>
+        <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-live" /> Selected</span>
       </div>
 
       <div className="mt-6">
-        <div className="text-[11px] uppercase tracking-wider text-gold">May 2025</div>
+        <div className="text-[11px] uppercase tracking-wider text-live">May 2025</div>
         <div className="mt-3 grid grid-cols-7 gap-1.5 text-center">
           {["S", "M", "T", "W", "T", "F", "S"].map((d) => (
             <div key={d} className="text-[10px] uppercase text-muted">{d}</div>
@@ -222,10 +233,10 @@ function DateStep({ data, setData, onNext, onBack }: { data: FormData; setData: 
                 className={clsx(
                   "border py-2.5 text-sm transition-colors",
                   selected
-                    ? "border-gold bg-gold text-bg"
+                    ? "border-live bg-live text-bg"
                     : booked
                       ? "cursor-not-allowed border-rose/30 bg-rose/10 text-rose/60 line-through"
-                      : "border-emerald/30 bg-emerald/5 text-cream hover:border-gold hover:bg-gold/10"
+                      : "border-emerald/30 bg-emerald/5 text-cream hover:border-live hover:bg-live/10"
                 )}
               >
                 {day}
@@ -335,8 +346,8 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
     <div className="space-y-6">
       <Card>
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center border border-gold bg-gold/10">
-            <CheckCircle2 className="h-6 w-6 text-gold" />
+          <div className="flex h-12 w-12 items-center justify-center border border-live bg-live/10">
+            <CheckCircle2 className="h-6 w-6 text-live" />
           </div>
           <div>
             <Badge tone="emerald">Confirmed Booking Request</Badge>
@@ -355,7 +366,7 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
 
         <div className="mt-8 border-t border-card-border pt-6">
           <div className="flex items-start gap-3">
-            <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+            <CalendarIcon className="mt-0.5 h-4 w-4 shrink-0 text-live" />
             <p className="text-sm text-cream/80">
               We'll confirm your session within 2 hours. A calendar invite goes out the moment we
               lock the slot — no chasing, no follow-up emails to send.
@@ -367,7 +378,7 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
       {/* Mock confirmation email preview */}
       <Card>
         <div className="flex items-center gap-2">
-          <Mail className="h-4 w-4 text-gold" />
+          <Mail className="h-4 w-4 text-live" />
           <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Confirmation Email Preview</div>
         </div>
         <h3 className="mt-1 font-heading text-xl text-cream">Here's what you'll receive in your inbox</h3>
@@ -380,10 +391,10 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
           <div className="space-y-3 p-5 text-sm leading-relaxed text-cream/85">
             <p>Hi {data.fullName.split(" ")[0] || "there"},</p>
             <p>Thanks for booking 239 Live Studios. Here's your booking summary:</p>
-            <div className="border-l-2 border-gold pl-4 text-cream/80">
-              <div><strong className="text-gold">Package:</strong> {pkg?.name}</div>
-              <div><strong className="text-gold">Date:</strong> {data.date}</div>
-              <div><strong className="text-gold">Crew:</strong> {data.crewSize} · {data.equipment}</div>
+            <div className="border-l-2 border-live pl-4 text-cream/80">
+              <div><strong className="text-live">Package:</strong> {pkg?.name}</div>
+              <div><strong className="text-live">Date:</strong> {data.date}</div>
+              <div><strong className="text-live">Crew:</strong> {data.crewSize} · {data.equipment}</div>
             </div>
             <p>We'll confirm the exact start time within 2 hours. The studio is at 239 Live HQ, Naples FL — parking is free, gear is racked and ready.</p>
             <p>If anything changes on your end, just reply to this email.</p>
@@ -405,7 +416,7 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
 }
 
 const inputCls =
-  "w-full border border-card-border bg-bg px-3 py-2.5 text-sm text-cream focus:border-gold focus:outline-none";
+  "w-full border border-card-border bg-bg px-3 py-2.5 text-sm text-cream focus:border-live focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

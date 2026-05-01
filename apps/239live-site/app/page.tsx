@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, Button, Badge } from "@naples/ui";
 import { APP_URLS } from "@naples/mock-data";
-import { Mic2, Camera, Star, ShoppingBag, ArrowRight, Headphones, Building2, Anchor, Radio, Tv2, Sparkles, Disc3 } from "lucide-react";
+import { Mic2, Camera, Star, ArrowRight, Headphones, Building2, Radio, Tv2, Disc3, Calendar, MapPin, Quote } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -71,24 +71,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* METRICS STRIP */}
+      {/* STUDIO STATS — customer-facing */}
       <section className="border-b border-card-border bg-bg-deep">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-card-border md:grid-cols-4">
-          <Metric value="$0" label="Hidden Fees" />
-          <Metric value="$40K+" label="Monthly Potential" />
-          <Metric value="30 Day" label="Build Window" />
-          <Metric value="4" label="Revenue Streams" />
+          <Metric value="3-Cam" label="Broadcast Setup" />
+          <Metric value="8a–10p" label="Open Daily" />
+          <Metric value="100+" label="Episodes Recorded" />
+          <Metric value="Naples" label="Old Naples · Free Parking" />
         </div>
       </section>
 
-      {/* REVENUE STREAMS */}
+      {/* WHAT YOU CAN DO HERE — customer-focused use cases */}
       <section className="mx-auto max-w-7xl px-6 py-24">
-        <SectionHeader eyebrow="What we do" title="Four ways the studio generates revenue." />
+        <SectionHeader eyebrow="What you can record here" title="Built for the work." />
         <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StreamCard Icon={Camera} name="Studio Rental" range="$3K – 6K /mo" description="Hourly to monthly bookings. Real estate, content creators, corporate brand, events." />
-          <StreamCard Icon={Mic2} name="Content Agency" range="$5K – 15K /mo" description="Done-for-you podcast and social production. AI-powered repurposing pipeline." />
-          <StreamCard Icon={Star} name="Show Sponsors" range="$1K – 4K /mo" description="Bronze, Silver, and Gold sponsor tiers across our flagship shows." />
-          <StreamCard Icon={ShoppingBag} name="SWFL Merch" range="$0 – 1.5K /mo" description="Branded apparel and accessories tied to the shows and the regional identity." />
+          <StreamCard Icon={Mic2} name="Podcasts" range="$150 – 400 / day" description="Long-form interviews, panel shows, narrative episodes. Acoustic-treated, four SM7Bs racked and ready." />
+          <StreamCard Icon={Building2} name="Real Estate" range="$300 – 600 / session" description="Listing tours, broker brand video, agent intros. Lit and framed for property storytelling." />
+          <StreamCard Icon={Camera} name="Brand Content" range="$1.5K – 5K / mo" description="Corporate brand video, founder stories, recurring content programs with full production support." />
+          <StreamCard Icon={Star} name="Live Events" range="$500 – 2K / event" description="Private launches, brand activations, intimate panels. Up to 50 guests, optional catering." />
         </div>
       </section>
 
@@ -125,38 +125,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* WHO USES THE SPACE */}
+      {/* TESTIMONIALS */}
       <section className="mx-auto max-w-7xl px-6 py-24">
-        <SectionHeader eyebrow="The room" title="Built for serious work." />
-        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-          <ClientCard Icon={Headphones} type="Content Creators" price="$150 – 400 / day" />
-          <ClientCard Icon={Building2} type="Real Estate" price="$300 – 600 / session" />
-          <ClientCard Icon={Star} type="Corporate Brand" price="$1.5K – 5K / mo" />
-          <ClientCard Icon={Mic2} type="Live Events" price="$500 – 2K / event" />
-          <ClientCard Icon={Anchor} type="Membership" price="$1,500 / mo" />
+        <SectionHeader eyebrow="From the room" title="What creators say." />
+        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Testimonial
+            quote="Cleanest sound I've cut a podcast in. Showed up, hit record, walked out with three episodes."
+            name="Marco DiSalvo"
+            title="Host · 239 Built"
+          />
+          <Testimonial
+            quote="My listing video looked like Architectural Digest. Best $500 I've spent on marketing this year."
+            name="Diana Russo"
+            title="Broker · Premier Naples Estates"
+          />
+          <Testimonial
+            quote="We run our weekly brand show out of 239 Live. Membership pays for itself the first week of every month."
+            name="Sarah Chen"
+            title="Founder · Coastal Capital"
+          />
         </div>
       </section>
 
-      {/* THE SYSTEM */}
+      {/* VISIT / CONTACT */}
       <section className="border-y border-card-border bg-bg-deep py-24">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <Sparkles className="h-4 w-4 text-live" />
-            <div className="text-[10px] uppercase tracking-[0.32em] text-live">The System Behind The Studio</div>
-          </div>
-          <h2 className="mt-5 font-heading text-5xl leading-[0.95] tracking-broadcast text-cream md:text-7xl">
-            Your system finds clients.<br />
-            <span className="text-live">You do the work.</span>
-          </h2>
-          <div className="mx-auto mt-5 h-px w-16 bg-live" />
-          <p className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-cream/70">
-            Cold outreach, lead pipeline, content distribution, sponsor follow-up — running automatically
-            in the background. Built by Naples Digital. Owned by 239 Live.
-          </p>
-          <div className="mt-10">
-            <Link href={APP_URLS.dashboard}>
-              <Button variant="ghost">See the operator dashboard <ArrowRight className="ml-2 h-4 w-4" /></Button>
-            </Link>
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <VisitDetail Icon={MapPin} label="The Studio" lines={["239 Live HQ", "Old Naples, FL", "Free on-site parking"]} />
+            <VisitDetail Icon={Calendar} label="Hours" lines={["Mon – Sat", "8:00 AM – 10:00 PM", "Sundays by request"]} />
+            <VisitDetail Icon={Radio} label="Contact" lines={["hello@239live.com", "(239) 555-0239", "Reply within 2 hours"]} />
           </div>
         </div>
       </section>
@@ -241,12 +238,27 @@ function ShowCard({ gradient, accent, name, format, description, tier }: { gradi
   );
 }
 
-function ClientCard({ Icon, type, price }: { Icon: React.ComponentType<{ className?: string }>; type: string; price: string }) {
+function Testimonial({ quote, name, title }: { quote: string; name: string; title: string }) {
   return (
-    <div className="border border-card-border bg-card p-5 transition-colors hover:border-live/60">
+    <Card className="flex h-full flex-col">
+      <Quote className="h-5 w-5 text-live" />
+      <p className="mt-4 flex-1 text-sm leading-relaxed text-cream/85">"{quote}"</p>
+      <div className="mt-6 border-t border-card-border pt-4">
+        <div className="font-heading text-lg tracking-broadcast text-cream">{name}</div>
+        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted">{title}</div>
+      </div>
+    </Card>
+  );
+}
+
+function VisitDetail({ Icon, label, lines }: { Icon: React.ComponentType<{ className?: string }>; label: string; lines: string[] }) {
+  return (
+    <div className="border-t-2 border-live bg-card p-6">
       <Icon className="h-5 w-5 text-live" />
-      <div className="mt-4 font-heading text-lg tracking-broadcast text-cream">{type}</div>
-      <div className="mt-1 text-[10px] uppercase tracking-wider text-muted">{price}</div>
+      <div className="mt-4 text-[10px] uppercase tracking-[0.32em] text-live">{label}</div>
+      <div className="mt-3 space-y-1 text-sm text-cream/80">
+        {lines.map((l, i) => <div key={i}>{l}</div>)}
+      </div>
     </div>
   );
 }
