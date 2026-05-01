@@ -13,11 +13,11 @@ import {
   closestCorners,
 } from "@dnd-kit/core";
 import { Card, Badge } from "@naples/ui";
-import { MOCK_LEADS, LEAD_STAGES, Lead, LeadStage } from "@naples/mock-data";
+import { LEAD_STAGES, Lead, LeadStage } from "@naples/mock-data";
 import clsx from "clsx";
 
-export function Board() {
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+export function Board({ initialLeads }: { initialLeads: Lead[] }) {
+  const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -31,9 +31,18 @@ export function Board() {
     const leadId = String(e.active.id);
     const targetStage = String(e.over.id) as LeadStage;
     if (!LEAD_STAGES.includes(targetStage)) return;
+    const lead = leads.find((l) => l.id === leadId);
+    if (!lead || lead.stage === targetStage) return;
+    // Optimistic UI update
     setLeads((prev) =>
-      prev.map((l) => (l.id === leadId && l.stage !== targetStage ? { ...l, stage: targetStage, daysInStage: 0 } : l))
+      prev.map((l) => (l.id === leadId ? { ...l, stage: targetStage, daysInStage: 0 } : l))
     );
+    // Persist to Supabase. Failure does not roll back — board stays usable.
+    fetch(`/api/leads/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: targetStage, days_in_stage: 0 }),
+    }).catch(() => {});
   }
 
   const totalPipeline = leads.reduce((s, l) => s + l.value, 0);
