@@ -18,8 +18,8 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "239 Live System",
-  description: "Naples Digital × 239 Live — Southwest Florida's Media Home",
+  title: "239 Live — Lead Management",
+  description: "Drag-and-drop lead pipeline with AI-generated outreach angles.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

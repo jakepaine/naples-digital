@@ -16,7 +16,7 @@ export default async function CrmPage() {
       <header className="mb-6 flex items-end justify-between">
         <div>
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted">Sales</div>
-          <h1 className="mt-1 font-heading text-4xl text-cream">CRM Pipeline</h1>
+          <h1 className="mt-1 font-heading text-4xl text-cream">Lead Management</h1>
           <div className="mt-1 h-px w-12 bg-gold" />
         </div>
         <a href={APP_URLS.crm} target="_blank" rel="noopener">

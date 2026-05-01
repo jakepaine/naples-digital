@@ -21,6 +21,7 @@ const EQUIPMENT = ["Studio gear only", "Bringing my own", "Mixed"];
 interface FormData {
   packageId: string;
   date: string;
+  time: string;
   fullName: string;
   company: string;
   email: string;
@@ -31,11 +32,26 @@ interface FormData {
   notes: string;
 }
 
+// Studio operating hours — show 8 AM through 9 PM in 1-hour slots.
+const TIME_SLOTS = [
+  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
+  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM",
+  "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM",
+];
+// Mock booked time slots (per-date) so the demo shows realistic availability.
+const BOOKED_SLOTS: Record<string, Set<string>> = {
+  "2025-05-02": new Set(["10:00 AM", "11:00 AM", "2:00 PM"]),
+  "2025-05-03": new Set(["9:00 AM", "1:00 PM", "5:00 PM", "6:00 PM"]),
+  "2025-05-05": new Set(["8:00 AM", "10:00 AM", "3:00 PM", "4:00 PM"]),
+  "2025-05-06": new Set(["12:00 PM", "1:00 PM"]),
+};
+
 export function Wizard() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>({
     packageId: "",
     date: "",
+    time: "",
     fullName: "",
     company: "",
     email: "",
@@ -64,6 +80,7 @@ export function Wizard() {
         body: JSON.stringify({
           packageId: data.packageId,
           date: data.date,
+          time: data.time,
           fullName: data.fullName,
           company: data.company,
           email: data.email,
@@ -218,12 +235,50 @@ function DateStep({ data, setData, onNext, onBack }: { data: FormData; setData: 
         </div>
       </div>
 
+      {data.date && (
+        <div className="mt-8 border-t border-card-border pt-6">
+          <div className="text-[11px] uppercase tracking-wider text-live">Pick Your Time · {prettyDate(data.date)}</div>
+          <p className="mt-1 text-[11px] text-muted">Studio hours 8 AM – 9 PM. Sessions are 1 hour each.</p>
+          <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+            {TIME_SLOTS.map((slot) => {
+              const taken = BOOKED_SLOTS[data.date]?.has(slot) ?? false;
+              const selected = data.time === slot;
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  disabled={taken}
+                  onClick={() => setData({ ...data, time: slot })}
+                  className={clsx(
+                    "border py-2 text-xs transition-colors",
+                    selected
+                      ? "border-live bg-live text-bg"
+                      : taken
+                        ? "cursor-not-allowed border-rose/30 bg-rose/10 text-rose/60 line-through"
+                        : "border-emerald/30 bg-emerald/5 text-cream hover:border-live hover:bg-live/10"
+                  )}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 flex items-center justify-between">
         <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
-        <Button disabled={!data.date} onClick={onNext}>Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>
+        <Button disabled={!data.date || !data.time} onClick={onNext}>Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>
       </div>
     </Card>
   );
+}
+
+function prettyDate(iso: string): string {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  const [y, m, d] = iso.split("-").map(Number);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[m-1]} ${d}, ${y}`;
 }
 
 function InfoStep({ data, setData, onSubmit, onBack, submitting }: { data: FormData; setData: (d: FormData) => void; onSubmit: (e: React.FormEvent) => void; onBack: () => void; submitting: boolean }) {
@@ -291,7 +346,7 @@ function ConfirmationStep({ data, pkg }: { data: FormData; pkg: ReturnType<typeo
 
         <div className="mt-8 grid gap-4 border-t border-card-border pt-6 md:grid-cols-2">
           <Detail label="Package" value={pkg?.name || "—"} sub={pkg?.price} />
-          <Detail label="Date" value={data.date || "—"} sub="May 2025" />
+          <Detail label="Date" value={data.date ? prettyDate(data.date) : "—"} sub={data.time || "Time TBD"} />
           <Detail label="Name" value={data.fullName} sub={data.company || undefined} />
           <Detail label="Email" value={data.email} sub={data.phone || undefined} />
           <Detail label="Shoot Type" value={data.shootType} sub={`${data.crewSize} crew · ${data.equipment.toLowerCase()}`} />

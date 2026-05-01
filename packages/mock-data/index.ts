@@ -9,6 +9,7 @@ export interface Booking {
   client: string;
   package: string;
   date: string;
+  time?: string;
   revenue: number;
   status: BookingStatus;
 }

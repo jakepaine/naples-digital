@@ -9,7 +9,7 @@ const LINKS: { key: NonNullable<NavProps["active"]>; label: string; href: string
   { key: "site", label: "Studio", href: APP_URLS.site },
   { key: "booking", label: "Book", href: APP_URLS.booking },
   { key: "dashboard", label: "Dashboard", href: APP_URLS.dashboard },
-  { key: "crm", label: "CRM", href: APP_URLS.crm },
+  { key: "crm", label: "Leads", href: APP_URLS.crm },
   { key: "content", label: "Content", href: APP_URLS.content },
   { key: "outreach", label: "Outreach", href: APP_URLS.outreach },
   { key: "sponsorPitch", label: "Sponsor Pitch", href: APP_URLS.sponsorPitch },

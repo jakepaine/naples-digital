@@ -15,7 +15,7 @@ import clsx from "clsx";
 const ITEMS = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
-  { href: "/crm", label: "CRM Pipeline", icon: Users },
+  { href: "/crm", label: "Lead Management", icon: Users },
   { href: "/content", label: "Content Pipeline", icon: Video },
   { href: "/revenue", label: "Revenue & Commissions", icon: CircleDollarSign },
   { href: "/outreach", label: "Outreach", icon: Mail },

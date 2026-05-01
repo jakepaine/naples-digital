@@ -28,6 +28,7 @@ const PACKAGE_NAMES: Record<string, string> = {
 interface Body {
   packageId: string;
   date: string;
+  time?: string;
   fullName: string;
   company?: string;
   email: string;
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
     client,
     package: packageName,
     date: body.date,
+    time: body.time,
     revenue,
     status: "pending",
   });

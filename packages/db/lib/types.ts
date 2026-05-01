@@ -13,9 +13,27 @@ export type Database = {
   public: {
     Tables: {
       bookings: {
-        Row: { client: string; created_at: string; date: string; id: string; package: string; revenue: number; status: string; updated_at: string }
-        Insert: { client: string; created_at?: string; date: string; id?: string; package: string; revenue: number; status: string; updated_at?: string }
-        Update: { client?: string; created_at?: string; date?: string; id?: string; package?: string; revenue?: number; status?: string; updated_at?: string }
+        Row: { client: string; created_at: string; date: string; id: string; package: string; revenue: number; status: string; time: string | null; updated_at: string }
+        Insert: { client: string; created_at?: string; date: string; id?: string; package: string; revenue: number; status: string; time?: string | null; updated_at?: string }
+        Update: { client?: string; created_at?: string; date?: string; id?: string; package?: string; revenue?: number; status?: string; time?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      contracts: {
+        Row: { amount: number; booking_id: string | null; client_email: string; client_name: string; created_at: string; id: string; ip_address: string | null; package: string; scope: string; sent_at: string; signature_initials: string | null; signature_name: string | null; signature_typed: string | null; signed_at: string | null; status: string; terms: Json }
+        Insert: { amount: number; booking_id?: string | null; client_email: string; client_name: string; created_at?: string; id?: string; ip_address?: string | null; package: string; scope: string; sent_at?: string; signature_initials?: string | null; signature_name?: string | null; signature_typed?: string | null; signed_at?: string | null; status?: string; terms?: Json }
+        Update: { amount?: number; booking_id?: string | null; client_email?: string; client_name?: string; created_at?: string; id?: string; ip_address?: string | null; package?: string; scope?: string; sent_at?: string; signature_initials?: string | null; signature_name?: string | null; signature_typed?: string | null; signed_at?: string | null; status?: string; terms?: Json }
+        Relationships: []
+      }
+      invoices: {
+        Row: { client_email: string; client_name: string; created_at: string; description: string; due_at: string | null; id: string; issued_at: string; line_items: Json; number: string; paid_at: string | null; payment_method: string | null; status: string; stripe_payment_intent: string | null; subtotal: number; tax: number; total: number }
+        Insert: { client_email: string; client_name: string; created_at?: string; description: string; due_at?: string | null; id?: string; issued_at?: string; line_items?: Json; number: string; paid_at?: string | null; payment_method?: string | null; status?: string; stripe_payment_intent?: string | null; subtotal: number; tax?: number; total: number }
+        Update: { client_email?: string; client_name?: string; created_at?: string; description?: string; due_at?: string | null; id?: string; issued_at?: string; line_items?: Json; number?: string; paid_at?: string | null; payment_method?: string | null; status?: string; stripe_payment_intent?: string | null; subtotal?: number; tax?: number; total?: number }
+        Relationships: []
+      }
+      content_submissions: {
+        Row: { asset_type: string; client_email: string; client_name: string; created_at: string; delivered_at: string | null; delivery_url: string | null; description: string | null; duration_seconds: number | null; edit_brief: string | null; editor_notes: string | null; id: string; source_url: string | null; status: string; submitted_at: string; title: string }
+        Insert: { asset_type?: string; client_email: string; client_name: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; id?: string; source_url?: string | null; status?: string; submitted_at?: string; title: string }
+        Update: { asset_type?: string; client_email?: string; client_name?: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; id?: string; source_url?: string | null; status?: string; submitted_at?: string; title?: string }
         Relationships: []
       }
       clips: {

@@ -57,7 +57,7 @@ export function Board({ initialLeads }: { initialLeads: Lead[] }) {
     <div className="px-6 py-12">
       <header className="mx-auto mb-8 max-w-7xl">
         <div className="text-[10px] uppercase tracking-[0.32em] text-gold">Sales Engine</div>
-        <h1 className="mt-3 font-heading text-5xl text-cream">CRM Pipeline</h1>
+        <h1 className="mt-3 font-heading text-5xl text-cream">Lead Management</h1>
         <div className="mt-3 h-px w-16 bg-gold" />
         <p className="mt-4 max-w-2xl text-sm text-cream/70">
           Drag any lead between stages. Column totals update in real time. This board is the

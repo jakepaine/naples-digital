@@ -15,8 +15,9 @@ type ClipRow = Database["public"]["Tables"]["clips"]["Row"];
 // Mappers — DB row ↔ domain type from @naples/mock-data
 // ============================================================
 
-const rowToBooking = (r: BookingRow): Booking => ({
+const rowToBooking = (r: BookingRow & { time?: string | null }): Booking => ({
   id: r.id, client: r.client, package: r.package, date: r.date,
+  time: r.time ?? undefined,
   revenue: Number(r.revenue), status: r.status as Booking["status"],
 });
 const rowToLead = (r: LeadRow): Lead & { ai_angle: unknown } => ({
@@ -122,12 +123,14 @@ export async function getOutreachStats(): Promise<typeof OUTREACH_STATS> {
 export async function createBooking(input: Omit<Booking, "id">): Promise<Booking | null> {
   if (!hasSupabase()) return null;
   const sb = createServerClient();
-  const { data, error } = await sb.from("bookings").insert({
+  const insert: Record<string, unknown> = {
     client: input.client, package: input.package, date: input.date,
     revenue: input.revenue, status: input.status,
-  }).select("*").single();
+  };
+  if (input.time) insert.time = input.time;
+  const { data, error } = await sb.from("bookings").insert(insert as never).select("*").single();
   if (error || !data) return null;
-  return rowToBooking(data);
+  return rowToBooking(data as BookingRow & { time?: string | null });
 }
 
 export async function updateLeadStage(id: string, stage: LeadStage, daysInStage: number): Promise<boolean> {
@@ -291,4 +294,132 @@ export async function listSponsors() {
   const sb = createServerClient();
   const { data } = await sb.from("sponsors").select("*").order("created_at", { ascending: false });
   return data ?? [];
+}
+
+// ============================================================
+// PHASE 7 — Client Portal: contracts, invoices, content submissions
+// ============================================================
+
+type ContractRow = Database["public"]["Tables"]["contracts"]["Row"];
+type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
+type SubmissionRow = Database["public"]["Tables"]["content_submissions"]["Row"];
+
+export type Contract = ContractRow;
+export type Invoice = InvoiceRow;
+export type ContentSubmission = SubmissionRow;
+
+// Contracts
+export async function listContractsForEmail(email: string): Promise<Contract[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("contracts").select("*").eq("client_email", email).order("sent_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function getContract(id: string): Promise<Contract | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data } = await sb.from("contracts").select("*").eq("id", id).single();
+  return data ?? null;
+}
+
+export async function signContract(id: string, sig: { name: string; initials: string; typed: string; ip?: string }): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("contracts").update({
+    status: "signed",
+    signed_at: new Date().toISOString(),
+    signature_name: sig.name,
+    signature_initials: sig.initials,
+    signature_typed: sig.typed,
+    ip_address: sig.ip,
+  }).eq("id", id);
+  return !error;
+}
+
+export async function createContract(input: {
+  booking_id?: string;
+  client_name: string;
+  client_email: string;
+  package: string;
+  amount: number;
+  scope: string;
+  terms: string[];
+}): Promise<Contract | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("contracts").insert({
+    booking_id: input.booking_id,
+    client_name: input.client_name,
+    client_email: input.client_email,
+    package: input.package,
+    amount: input.amount,
+    scope: input.scope,
+    terms: input.terms as never,
+    status: "sent",
+  }).select("*").single();
+  if (error) return null;
+  return data;
+}
+
+// Invoices
+export async function listInvoicesForEmail(email: string): Promise<Invoice[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("invoices").select("*").eq("client_email", email).order("issued_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function getInvoice(id: string): Promise<Invoice | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data } = await sb.from("invoices").select("*").eq("id", id).single();
+  return data ?? null;
+}
+
+export async function markInvoicePaid(id: string, method = "card"): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("invoices").update({
+    status: "paid",
+    paid_at: new Date().toISOString(),
+    payment_method: method,
+    stripe_payment_intent: `pi_demo_${Math.random().toString(36).slice(2, 14)}`,
+  }).eq("id", id);
+  return !error;
+}
+
+// Content submissions
+export async function listSubmissionsForEmail(email: string): Promise<ContentSubmission[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("content_submissions").select("*").eq("client_email", email).order("submitted_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function createSubmission(input: {
+  client_name: string;
+  client_email: string;
+  title: string;
+  description?: string;
+  asset_type?: "video" | "audio" | "image" | "document";
+  source_url?: string;
+  duration_seconds?: number;
+  edit_brief?: string;
+}): Promise<ContentSubmission | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("content_submissions").insert({
+    client_name: input.client_name,
+    client_email: input.client_email,
+    title: input.title,
+    description: input.description,
+    asset_type: input.asset_type ?? "video",
+    source_url: input.source_url,
+    duration_seconds: input.duration_seconds,
+    edit_brief: input.edit_brief,
+    status: "submitted",
+  }).select("*").single();
+  if (error) return null;
+  return data;
 }
