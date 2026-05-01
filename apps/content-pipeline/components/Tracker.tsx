@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Card, Badge, Button } from "@naples/ui";
-import { MOCK_EPISODES, Episode, EpisodeStatus, Platform } from "@naples/mock-data";
+import { Episode, EpisodeStatus, Platform } from "@naples/mock-data";
 import { Instagram, Youtube, Facebook, Music2, Plus, CheckCircle2, Clock, Minus } from "lucide-react";
 
 const STATUS_TONE: Record<EpisodeStatus, "muted" | "sapphire" | "amber" | "violet" | "emerald"> = {
@@ -24,9 +24,10 @@ interface NewGuest {
   notes: string;
 }
 
-export function Tracker() {
-  const [episodes, setEpisodes] = useState<Episode[]>(MOCK_EPISODES);
+export function Tracker({ initialEpisodes }: { initialEpisodes: Episode[] }) {
+  const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<NewGuest>({
     name: "",
     company: "",
@@ -37,16 +38,35 @@ export function Tracker() {
     notes: "",
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim() || !form.topic.trim()) return;
-    const ep: Episode = {
-      id: `${Date.now()}`,
+    setSubmitting(true);
+    let saved: Episode | null = null;
+    try {
+      const res = await fetch("/api/episodes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          show: form.show,
+          title: form.topic,
+          guest: form.name,
+          guestTitle: form.company,
+          recordDate: form.recordDate || undefined,
+        }),
+      });
+      const json = (await res.json()) as { episode: Episode | null };
+      saved = json.episode;
+    } catch {
+      // ignore — fall through to optimistic local insert
+    }
+    const ep: Episode = saved ?? {
+      id: `local-${Date.now()}`,
       show: form.show,
       title: form.topic,
       guest: form.name,
       guestTitle: form.company,
-      recordDate: form.recordDate || "TBD",
+      recordDate: form.recordDate || new Date().toISOString().slice(0, 10),
       status: "Scheduled",
       clipsCut: 0,
       clipsPosted: 0,
@@ -55,6 +75,7 @@ export function Tracker() {
     setEpisodes((prev) => [ep, ...prev]);
     setSubmittedName(form.name);
     setForm({ name: "", company: "", show: "Billionaire Coast", topic: "", recordDate: "", instagram: "", notes: "" });
+    setSubmitting(false);
     setTimeout(() => setSubmittedName(null), 4000);
   }
 
@@ -197,8 +218,8 @@ export function Tracker() {
               <Field label="Notes for Producer">
                 <textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className={`${inputCls} resize-none`} placeholder="Topics to cover, sensitivity flags, preferred angle..." />
               </Field>
-              <Button type="submit" className="mt-2 w-full">
-                <Plus className="mr-2 h-4 w-4" /> Add to Pipeline
+              <Button type="submit" className="mt-2 w-full" disabled={submitting}>
+                <Plus className="mr-2 h-4 w-4" /> {submitting ? "Adding…" : "Add to Pipeline"}
               </Button>
             </form>
           </Card>
