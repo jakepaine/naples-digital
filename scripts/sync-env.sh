@@ -55,12 +55,19 @@ set_common() {
   railway variables "${args[@]}" > /dev/null
 }
 
+# Helper: services that call Anthropic get the key; others don't.
+ai_args=()
+if [ -n "$ANTHROPIC_KEY" ]; then
+  ai_args=( --set "ANTHROPIC_API_KEY=$ANTHROPIC_KEY" )
+fi
+
 set_common 239live-site     apps/239live-site/Dockerfile
 set_common booking-portal   apps/booking-portal/Dockerfile
 set_common dashboard        apps/dashboard/Dockerfile
 set_common agency-site      apps/agency-site/Dockerfile
-set_common crm-pipeline     apps/crm-pipeline/Dockerfile
-set_common content-pipeline apps/content-pipeline/Dockerfile
+set_common crm-pipeline     apps/crm-pipeline/Dockerfile     "${ai_args[@]}"
+set_common content-pipeline apps/content-pipeline/Dockerfile "${ai_args[@]}"
+set_common outreach-demo    apps/outreach-demo/Dockerfile    "${ai_args[@]}"
 
 # Phase 6 services — created later. Detect via `railway status --json` (which
 # lists all services), and skip silently if not yet provisioned.
@@ -68,16 +75,10 @@ detect_service() {
   railway status --json 2>/dev/null | grep -q "\"serviceName\": \"$1\""
 }
 if detect_service sponsor-pitch; then
-  set_common sponsor-pitch     apps/sponsor-pitch/Dockerfile
+  set_common sponsor-pitch     apps/sponsor-pitch/Dockerfile "${ai_args[@]}"
 fi
 if detect_service sponsor-analytics; then
   set_common sponsor-analytics apps/sponsor-analytics/Dockerfile
-fi
-
-if [ -n "$ANTHROPIC_KEY" ]; then
-  set_common outreach-demo apps/outreach-demo/Dockerfile --set "ANTHROPIC_API_KEY=$ANTHROPIC_KEY"
-else
-  set_common outreach-demo apps/outreach-demo/Dockerfile
 fi
 
 echo "✓ Env vars synced across all services."
