@@ -379,6 +379,58 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
+  apps/sponsor-analytics:
+    dependencies:
+      '@naples/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@naples/mock-data':
+        specifier: workspace:*
+        version: link:../../packages/mock-data
+      '@naples/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.460.0
+        version: 0.460.0(react@18.3.1)
+      next:
+        specifier: ^14.2.35
+        version: 14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      recharts:
+        specifier: ^2.13.3
+        version: 2.15.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.0
+        version: 20.19.39
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.13)
+      postcss:
+        specifier: ^8.4.47
+        version: 8.5.13
+      tailwindcss:
+        specifier: ^3.4.13
+        version: 3.4.19
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   apps/sponsor-pitch:
     dependencies:
       '@anthropic-ai/sdk':
