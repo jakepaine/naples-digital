@@ -1,0 +1,283 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Scaffolds 7 Next.js 14 apps with shared Tailwind preset, brand fonts,
+# Dockerfile for Railway, and consistent layout.
+# Idempotent — running twice overwrites with the latest template.
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# name:port pairs (order matters for placeholder URLs)
+APPS=(
+  "239live-site:3000:site"
+  "booking-portal:3001:booking"
+  "dashboard:3002:dashboard"
+  "agency-site:3003:agency"
+  "outreach-demo:3004:outreach"
+  "crm-pipeline:3005:crm"
+  "content-pipeline:3006:content"
+)
+
+for entry in "${APPS[@]}"; do
+  IFS=':' read -r APP PORT NAVKEY <<< "$entry"
+  APP_DIR="apps/$APP"
+  mkdir -p "$APP_DIR/app" "$APP_DIR/public"
+
+  # package.json
+  cat > "$APP_DIR/package.json" <<EOF
+{
+  "name": "@naples/$APP",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p \${PORT:-$PORT}",
+    "build": "next build",
+    "start": "next start -p \${PORT:-$PORT}",
+    "lint": "next lint",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@naples/mock-data": "workspace:*",
+    "@naples/ui": "workspace:*",
+    "next": "14.2.18",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.3"
+  }
+}
+EOF
+
+  # next.config.js — standalone output for Docker, transpile workspace pkgs
+  cat > "$APP_DIR/next.config.js" <<'EOF'
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: "standalone",
+  reactStrictMode: true,
+  transpilePackages: ["@naples/ui", "@naples/mock-data"],
+  experimental: {
+    outputFileTracingRoot: require("path").join(__dirname, "../../"),
+  },
+};
+module.exports = nextConfig;
+EOF
+
+  # tsconfig.json
+  cat > "$APP_DIR/tsconfig.json" <<'EOF'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+EOF
+
+  # tailwind.config.ts
+  cat > "$APP_DIR/tailwind.config.ts" <<'EOF'
+import type { Config } from "tailwindcss";
+import preset from "@naples/ui/tailwind-preset";
+
+const config: Config = {
+  presets: [preset as Config],
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "../../packages/ui/components/**/*.tsx",
+  ],
+};
+export default config;
+EOF
+
+  # postcss.config.js
+  cat > "$APP_DIR/postcss.config.js" <<'EOF'
+module.exports = {
+  plugins: { tailwindcss: {}, autoprefixer: {} },
+};
+EOF
+
+  # globals.css
+  cat > "$APP_DIR/app/globals.css" <<'EOF'
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #0A0A0A;
+  color: #F5EDD8;
+  font-feature-settings: "ss01", "ss02";
+}
+
+::selection {
+  background: rgba(201, 168, 76, 0.35);
+  color: #F5EDD8;
+}
+
+/* Subtle gold scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0A0A0A; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #C9A84C; }
+EOF
+
+  # layout.tsx
+  cat > "$APP_DIR/app/layout.tsx" <<EOF
+import type { Metadata } from "next";
+import { Playfair_Display, Montserrat } from "next/font/google";
+import { BrandFrame, Nav } from "@naples/ui";
+import "./globals.css";
+
+const heading = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const body = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "239 Live System",
+  description: "Naples Digital × 239 Live — Southwest Florida's Media Home",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={\`\${heading.variable} \${body.variable}\`}>
+      <body>
+        <BrandFrame>
+          <Nav active="$NAVKEY" />
+          {children}
+        </BrandFrame>
+      </body>
+    </html>
+  );
+}
+EOF
+
+  # placeholder page.tsx (will be overwritten per-app)
+  if [ ! -f "$APP_DIR/app/page.tsx" ]; then
+    cat > "$APP_DIR/app/page.tsx" <<EOF
+export default function Page() {
+  return (
+    <main className="mx-auto max-w-7xl px-6 py-16">
+      <h1 className="font-heading text-5xl text-cream">$APP</h1>
+      <div className="mt-3 h-px w-16 bg-gold" />
+      <p className="mt-6 text-muted">Scaffold ready · port $PORT</p>
+    </main>
+  );
+}
+EOF
+  fi
+
+  # Dockerfile (Next.js standalone for Railway)
+  cat > "$APP_DIR/Dockerfile" <<EOF
+# syntax=docker/dockerfile:1.7
+
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /repo
+
+# Copy workspace manifests for install caching
+FROM base AS deps
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/mock-data/package.json ./packages/mock-data/
+COPY apps/$APP/package.json ./apps/$APP/
+RUN pnpm install --frozen-lockfile=false
+
+# Build stage
+FROM base AS builder
+COPY --from=deps /repo /repo
+COPY packages ./packages
+COPY apps/$APP ./apps/$APP
+WORKDIR /repo/apps/$APP
+RUN pnpm exec next build
+
+# Runtime stage — minimal Alpine + standalone output
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /repo/apps/$APP/.next/standalone ./
+COPY --from=builder /repo/apps/$APP/.next/static ./apps/$APP/.next/static
+COPY --from=builder /repo/apps/$APP/public ./apps/$APP/public
+
+ENV HOSTNAME=0.0.0.0
+ENV PORT=$PORT
+EXPOSE $PORT
+
+CMD ["node", "apps/$APP/server.js"]
+EOF
+
+  # .dockerignore
+  cat > "$APP_DIR/.dockerignore" <<'EOF'
+node_modules
+.next
+.turbo
+.git
+.env*
+!.env.example
+README.md
+Dockerfile
+.dockerignore
+EOF
+
+  # railway.json — tells Railway to use this Dockerfile and the right context
+  cat > "$APP_DIR/railway.json" <<EOF
+{
+  "\$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/$APP/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "node apps/$APP/server.js",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}
+EOF
+
+  # next-env.d.ts
+  cat > "$APP_DIR/next-env.d.ts" <<'EOF'
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+EOF
+
+  echo "✓ scaffolded apps/$APP (port $PORT, nav $NAVKEY)"
+done
+
+echo "Done. 7 apps scaffolded."
