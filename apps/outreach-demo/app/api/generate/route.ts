@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { generateMockSequence } from "@/lib/mock-generator";
+import { logOutreachRun } from "@naples/db";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -39,6 +40,13 @@ export async function POST(req: Request) {
 
   if (!apiKey) {
     const sequence = generateMockSequence({ businessName, businessType, outreachGoal });
+    await logOutreachRun({
+      business_name: businessName,
+      business_type: businessType,
+      goal: outreachGoal,
+      source: "mock",
+      emails: sequence,
+    });
     return NextResponse.json({ ...sequence, source: "mock" });
   }
 
@@ -69,10 +77,24 @@ export async function POST(req: Request) {
       throw new Error("Invalid response shape from API");
     }
 
+    await logOutreachRun({
+      business_name: businessName,
+      business_type: businessType,
+      goal: outreachGoal,
+      source: "api",
+      emails: parsed,
+    });
     return NextResponse.json({ ...parsed, source: "anthropic" });
   } catch (err) {
     // Fail soft — never let the demo screen show an error.
     const fallback = generateMockSequence({ businessName, businessType, outreachGoal });
+    await logOutreachRun({
+      business_name: businessName,
+      business_type: businessType,
+      goal: outreachGoal,
+      source: "fallback",
+      emails: fallback,
+    });
     return NextResponse.json({
       ...fallback,
       source: "mock-fallback",
