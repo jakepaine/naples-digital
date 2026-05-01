@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { BrandFrame, Nav } from "@naples/ui";
+import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
 const heading = Playfair_Display({
@@ -18,8 +19,8 @@ const body = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "239 Live System",
-  description: "Naples Digital × 239 Live — Southwest Florida's Media Home",
+  title: "Kevin's Dashboard · 239 Live",
+  description: "Operations hub for the entire 239 Live business",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +29,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <BrandFrame>
           <Nav active="dashboard" />
-          {children}
+          <div className="flex">
+            <Sidebar />
+            <div className="min-h-[calc(100vh-3.5rem)] flex-1 overflow-x-hidden">
+              {children}
+            </div>
+          </div>
         </BrandFrame>
       </body>
     </html>
