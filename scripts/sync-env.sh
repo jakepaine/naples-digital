@@ -62,11 +62,15 @@ set_common agency-site      apps/agency-site/Dockerfile
 set_common crm-pipeline     apps/crm-pipeline/Dockerfile
 set_common content-pipeline apps/content-pipeline/Dockerfile
 
-# Phase 6 services — created later. Skip if not yet provisioned.
-if railway service list 2>/dev/null | grep -qi "sponsor-pitch"; then
+# Phase 6 services — created later. Detect via `railway status --json` (which
+# lists all services), and skip silently if not yet provisioned.
+detect_service() {
+  railway status --json 2>/dev/null | grep -q "\"serviceName\": \"$1\""
+}
+if detect_service sponsor-pitch; then
   set_common sponsor-pitch     apps/sponsor-pitch/Dockerfile
 fi
-if railway service list 2>/dev/null | grep -qi "sponsor-analytics"; then
+if detect_service sponsor-analytics; then
   set_common sponsor-analytics apps/sponsor-analytics/Dockerfile
 fi
 

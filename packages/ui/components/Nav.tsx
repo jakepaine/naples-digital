@@ -2,7 +2,7 @@ import Link from "next/link";
 import { APP_URLS } from "@naples/mock-data";
 
 interface NavProps {
-  active?: "site" | "booking" | "dashboard" | "agency" | "outreach" | "crm" | "content";
+  active?: "site" | "booking" | "dashboard" | "agency" | "outreach" | "crm" | "content" | "sponsorPitch" | "sponsorAnalytics";
 }
 
 const LINKS: { key: NonNullable<NavProps["active"]>; label: string; href: string }[] = [
@@ -12,6 +12,7 @@ const LINKS: { key: NonNullable<NavProps["active"]>; label: string; href: string
   { key: "crm", label: "CRM", href: APP_URLS.crm },
   { key: "content", label: "Content", href: APP_URLS.content },
   { key: "outreach", label: "Outreach", href: APP_URLS.outreach },
+  { key: "sponsorPitch", label: "Sponsor Pitch", href: APP_URLS.sponsorPitch },
   { key: "agency", label: "Naples Digital", href: APP_URLS.agency },
 ];
 
