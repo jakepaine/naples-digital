@@ -10,14 +10,15 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@naples/db": "workspace:*",
     "@naples/mock-data": "workspace:*",
     "@naples/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
     "next": "^14.2.35",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.460.0"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

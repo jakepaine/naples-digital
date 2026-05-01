@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Card, Badge, Button } from "@naples/ui";
 import { Episode, EpisodeStatus, Platform } from "@naples/mock-data";
-import { Instagram, Youtube, Facebook, Music2, Plus, CheckCircle2, Clock, Minus } from "lucide-react";
+import { Instagram, Youtube, Facebook, Music2, Plus, CheckCircle2, Clock, Minus, ChevronDown, ChevronRight, Clapperboard } from "lucide-react";
+import { ClipsRow } from "./ClipsRow";
 
 const STATUS_TONE: Record<EpisodeStatus, "muted" | "sapphire" | "amber" | "violet" | "emerald"> = {
   Draft: "muted",
@@ -28,6 +29,16 @@ export function Tracker({ initialEpisodes }: { initialEpisodes: Episode[] }) {
   const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggleExpanded(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
   const [form, setForm] = useState<NewGuest>({
     name: "",
     company: "",
@@ -120,27 +131,53 @@ export function Tracker({ initialEpisodes }: { initialEpisodes: Episode[] }) {
                     <th className="py-3 pr-3">Guest</th>
                     <th className="py-3 pr-3">Date</th>
                     <th className="py-3 pr-3">Status</th>
-                    <th className="py-3 pr-3 text-right">Clips</th>
+                    <th className="py-3 pr-3 text-right">Posted/Cut</th>
+                    <th className="py-3 pr-3 text-right">AI Clips</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {episodes.map((ep) => (
-                    <tr key={ep.id} className="border-b border-card-border/40 hover:bg-card-border/20">
-                      <td className="py-3 pr-3 text-gold">{ep.show}</td>
-                      <td className="py-3 pr-3 text-cream">{ep.title}</td>
-                      <td className="py-3 pr-3 text-muted">
-                        {ep.guest}
-                        {ep.guestTitle && <span className="text-[11px]"> · {ep.guestTitle}</span>}
-                      </td>
-                      <td className="py-3 pr-3 text-muted">{ep.recordDate}</td>
-                      <td className="py-3 pr-3">
-                        <StatusBadge status={ep.status} />
-                      </td>
-                      <td className="py-3 pr-3 text-right text-xs text-cream">
-                        {ep.clipsPosted}/{ep.clipsCut}
-                      </td>
-                    </tr>
-                  ))}
+                  {episodes.map((ep) => {
+                    const isOpen = expanded.has(ep.id);
+                    const isLocal = ep.id.startsWith("local-");
+                    return (
+                      <>
+                        <tr key={ep.id} className="border-b border-card-border/40 hover:bg-card-border/20">
+                          <td className="py-3 pr-3 text-gold">{ep.show}</td>
+                          <td className="py-3 pr-3 text-cream">{ep.title}</td>
+                          <td className="py-3 pr-3 text-muted">
+                            {ep.guest}
+                            {ep.guestTitle && <span className="text-[11px]"> · {ep.guestTitle}</span>}
+                          </td>
+                          <td className="py-3 pr-3 text-muted">{ep.recordDate}</td>
+                          <td className="py-3 pr-3">
+                            <StatusBadge status={ep.status} />
+                          </td>
+                          <td className="py-3 pr-3 text-right text-xs text-cream">
+                            {ep.clipsPosted}/{ep.clipsCut}
+                          </td>
+                          <td className="py-3 pr-3 text-right">
+                            {!isLocal && (
+                              <button
+                                onClick={() => toggleExpanded(ep.id)}
+                                className="inline-flex items-center gap-1 border border-card-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-gold/60 hover:text-gold"
+                              >
+                                <Clapperboard className="h-3 w-3" />
+                                Clips
+                                {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                        {isOpen && !isLocal && (
+                          <tr key={`${ep.id}-clips`}>
+                            <td colSpan={7} className="p-0">
+                              <ClipsRow episodeId={ep.id} />
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
