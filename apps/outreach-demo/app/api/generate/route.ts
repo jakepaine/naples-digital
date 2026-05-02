@@ -11,6 +11,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { generateMockSequence } from "@/lib/mock-generator";
 import { logOutreachRun } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -37,10 +38,11 @@ export async function POST(req: Request) {
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
+  const tid = await getRequestTenantId(req);
 
   if (!apiKey) {
     const sequence = generateMockSequence({ businessName, businessType, outreachGoal });
-    await logOutreachRun({
+    await logOutreachRun(tid, {
       business_name: businessName,
       business_type: businessType,
       goal: outreachGoal,
@@ -77,7 +79,7 @@ export async function POST(req: Request) {
       throw new Error("Invalid response shape from API");
     }
 
-    await logOutreachRun({
+    await logOutreachRun(tid, {
       business_name: businessName,
       business_type: businessType,
       goal: outreachGoal,
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
   } catch (err) {
     // Fail soft — never let the demo screen show an error.
     const fallback = generateMockSequence({ businessName, businessType, outreachGoal });
-    await logOutreachRun({
+    await logOutreachRun(tid, {
       business_name: businessName,
       business_type: businessType,
       goal: outreachGoal,

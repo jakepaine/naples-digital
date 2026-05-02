@@ -1,5 +1,6 @@
 import { Card } from "@naples/ui";
 import { listSubmissionsForEmail } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { ContentSubmissionForm } from "@/components/ContentSubmissionForm";
 import { SubmissionList } from "@/components/SubmissionList";
 
@@ -7,7 +8,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ContentPage({ params }: { params: { email: string } }) {
   const email = decodeURIComponent(params.email);
-  const submissions = await listSubmissionsForEmail(email);
+  const tid = await getServerTenantId();
+  const submissions = await listSubmissionsForEmail(tid, email);
   const clientName = submissions[0]?.client_name ?? "Client";
 
   return (

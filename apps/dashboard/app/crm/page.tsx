@@ -1,12 +1,14 @@
 import { Card, Badge, Button } from "@naples/ui";
 import { LEAD_STAGES, APP_URLS } from "@naples/mock-data";
 import { listLeads } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { ExternalLink } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function CrmPage() {
-  const leads = await listLeads();
+  const tid = await getServerTenantId();
+  const leads = await listLeads(tid);
   const totalPipeline = leads.reduce((s, l) => s + l.value, 0);
   const won = leads.filter((l) => l.stage === "Client Won");
   const wonValue = won.reduce((s, l) => s + l.value, 0);

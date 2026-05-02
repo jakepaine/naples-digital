@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { signContract } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,7 +15,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (!body.name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0.0.0.0";
-  const ok = await signContract(params.id, {
+  const tid = await getRequestTenantId(req);
+  const ok = await signContract(tid, params.id, {
     name: body.name,
     initials: body.initials,
     typed: body.typed,

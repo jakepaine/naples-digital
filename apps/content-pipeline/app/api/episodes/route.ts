@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createEpisode } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 import type { Episode } from "@naples/mock-data";
 
 export const runtime = "nodejs";
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
     ? body.recordDate
     : new Date().toISOString().slice(0, 10);
 
-  const created = await createEpisode({
+  const tid = await getRequestTenantId(req);
+  const created = await createEpisode(tid, {
     show: body.show,
     title: body.title,
     guest: body.guest,

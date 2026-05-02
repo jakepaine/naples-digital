@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createBooking } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,7 +51,8 @@ export async function POST(req: Request) {
   const packageName = PACKAGE_NAMES[body.packageId] ?? body.packageId;
   const revenue = PACKAGE_REVENUE[body.packageId] ?? 250;
 
-  const created = await createBooking({
+  const tid = await getRequestTenantId(req);
+  const created = await createBooking(tid, {
     client,
     package: packageName,
     date: body.date,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getLeadById, cacheLeadAngle } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 import { generateMockAngle, LeadAngle } from "@/lib/mock-angle";
 
 export const runtime = "nodejs";
@@ -19,7 +20,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   let body: Body = {};
   try { body = await req.json(); } catch {}
 
-  const lead = await getLeadById(params.id);
+  const tid = await getRequestTenantId(req);
+  const lead = await getLeadById(tid, params.id);
   if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
   // Return cached angle if present (and caller didn't force regen)
@@ -30,7 +32,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     const angle = generateMockAngle({ name: lead.name, type: lead.type, goal: lead.goal });
-    await cacheLeadAngle(lead.id, angle);
+    await cacheLeadAngle(tid, lead.id, angle);
     return NextResponse.json(angle);
   }
 
@@ -51,12 +53,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const parsed = JSON.parse(cleaned) as Omit<LeadAngle, "source">;
     if (!parsed.summary || !parsed.hooks || !parsed.draft_dm) throw new Error("Invalid shape");
     const angle: LeadAngle = { ...parsed, source: "api" };
-    await cacheLeadAngle(lead.id, angle);
+    await cacheLeadAngle(tid, lead.id, angle);
     return NextResponse.json(angle);
   } catch {
     const angle = generateMockAngle({ name: lead.name, type: lead.type, goal: lead.goal });
     angle.source = "fallback";
-    await cacheLeadAngle(lead.id, angle);
+    await cacheLeadAngle(tid, lead.id, angle);
     return NextResponse.json(angle);
   }
 }

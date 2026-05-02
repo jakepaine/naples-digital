@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Card, Badge } from "@naples/ui";
 import { listContractsForEmail } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { FileSignature, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContractsPage({ params }: { params: { email: string } }) {
   const email = decodeURIComponent(params.email);
-  const contracts = await listContractsForEmail(email);
+  const tid = await getServerTenantId();
+  const contracts = await listContractsForEmail(tid, email);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">

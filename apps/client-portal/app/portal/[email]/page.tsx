@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { Card, Badge } from "@naples/ui";
 import { listContractsForEmail, listInvoicesForEmail, listSubmissionsForEmail } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { ArrowRight, FileSignature, Receipt, Film } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage({ params }: { params: { email: string } }) {
   const email = decodeURIComponent(params.email);
+  const tid = await getServerTenantId();
   const [contracts, invoices, submissions] = await Promise.all([
-    listContractsForEmail(email),
-    listInvoicesForEmail(email),
-    listSubmissionsForEmail(email),
+    listContractsForEmail(tid, email),
+    listInvoicesForEmail(tid, email),
+    listSubmissionsForEmail(tid, email),
   ]);
 
   const clientName = contracts[0]?.client_name ?? invoices[0]?.client_name ?? email;

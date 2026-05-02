@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Card, Badge } from "@naples/ui";
 import { getInvoice } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { PayInvoice } from "@/components/PayInvoice";
 import { CheckCircle2, Lock } from "lucide-react";
 
@@ -9,7 +10,8 @@ export const dynamic = "force-dynamic";
 interface LineItem { label: string; qty: number; price: number }
 
 export default async function InvoiceDetail({ params }: { params: { email: string; id: string } }) {
-  const inv = await getInvoice(params.id);
+  const tid = await getServerTenantId();
+  const inv = await getInvoice(tid, params.id);
   if (!inv) return notFound();
   const lineItems = inv.line_items as unknown as LineItem[];
 

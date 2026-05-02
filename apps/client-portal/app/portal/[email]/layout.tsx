@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listContractsForEmail, listInvoicesForEmail } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { PortalNav } from "@/components/PortalNav";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +13,10 @@ export default async function PortalLayout({
   params: { email: string };
 }) {
   const email = decodeURIComponent(params.email);
+  const tid = await getServerTenantId();
   const [contracts, invoices] = await Promise.all([
-    listContractsForEmail(email),
-    listInvoicesForEmail(email),
+    listContractsForEmail(tid, email),
+    listInvoicesForEmail(tid, email),
   ]);
 
   const clientName = contracts[0]?.client_name ?? invoices[0]?.client_name ?? email;

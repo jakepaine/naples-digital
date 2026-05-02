@@ -4,3 +4,4 @@ export { BrandFrame } from "./components/BrandFrame";
 export { Card } from "./components/Card";
 export { Button } from "./components/Button";
 export { Badge } from "./components/Badge";
+export { TenantBrandProvider, useTenantBrand, type TenantBrandValue, type TenantBrand } from "./components/TenantBrandProvider";

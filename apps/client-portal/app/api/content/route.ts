@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSubmission } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
   if (!body.client_email || !body.title) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-  const created = await createSubmission(body);
+  const tid = await getRequestTenantId(req);
+  const created = await createSubmission(tid, body);
   return NextResponse.json({ ok: !!created, submission: created });
 }

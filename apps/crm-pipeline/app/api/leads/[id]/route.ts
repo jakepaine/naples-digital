@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { updateLeadStage } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 import type { LeadStage } from "@naples/mock-data";
 
 export const runtime = "nodejs";
@@ -21,6 +22,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "Invalid stage" }, { status: 400 });
   }
 
-  const ok = await updateLeadStage(params.id, body.stage as LeadStage, body.days_in_stage ?? 0);
+  const tid = await getRequestTenantId(req);
+  const ok = await updateLeadStage(tid, params.id, body.stage as LeadStage, body.days_in_stage ?? 0);
   return NextResponse.json({ ok });
 }

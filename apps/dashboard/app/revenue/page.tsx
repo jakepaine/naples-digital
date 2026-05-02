@@ -3,12 +3,14 @@ import { ProjectionChart } from "@/components/ProjectionChart";
 import { SponsorList } from "@/components/SponsorList";
 import { PRICING } from "@naples/mock-data";
 import { getMrr, listLeads, getProjections, listSponsors } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 
 export const dynamic = "force-dynamic";
 
 export default async function RevenuePage() {
+  const tid = await getServerTenantId();
   const [mrr, leads, projections, sponsors] = await Promise.all([
-    getMrr(), listLeads(), getProjections(), listSponsors(),
+    getMrr(tid), listLeads(tid), getProjections(tid), listSponsors(tid),
   ]);
 
   const costs = [

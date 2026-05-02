@@ -8,14 +8,23 @@
     ".": "./index.ts",
     "./server": "./lib/server.ts",
     "./queries": "./lib/queries.ts",
-    "./types": "./lib/types.ts"
+    "./types": "./lib/types.ts",
+    "./tenant": "./lib/tenant.ts",
+    "./next": "./lib/next-tenant.ts"
   },
   "dependencies": {
     "@naples/mock-data": "workspace:*",
     "@supabase/supabase-js": "^2.45.4"
   },
+  "peerDependencies": {
+    "next": "^14.0.0 || ^15.0.0"
+  },
+  "peerDependenciesMeta": {
+    "next": { "optional": true }
+  },
   "devDependencies": {
     "@types/node": "^20.14.0",
+    "next": "^14.2.35",
     "typescript": "^5.6.3"
   }
 }

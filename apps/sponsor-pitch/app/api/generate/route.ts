@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createSponsorPitch } from "@naples/db";
+import { getRequestTenantId } from "@naples/db/next";
 import { generateMockPitch, SponsorPitch } from "@/lib/mock-pitch";
 
 export const runtime = "nodejs";
@@ -51,7 +52,8 @@ export async function POST(req: Request) {
     }
   }
 
-  const persisted = await createSponsorPitch({
+  const tid = await getRequestTenantId(req);
+  const persisted = await createSponsorPitch(tid, {
     sponsor_name: body.sponsorName,
     show: body.show,
     audience_match: pitch.audience_match,

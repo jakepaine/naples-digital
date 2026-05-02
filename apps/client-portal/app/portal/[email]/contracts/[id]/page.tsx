@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
 import { Card, Badge } from "@naples/ui";
 import { getContract } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { SigningPad } from "@/components/SigningPad";
 import { CheckCircle2, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContractDetail({ params }: { params: { email: string; id: string } }) {
-  const contract = await getContract(params.id);
+  const tid = await getServerTenantId();
+  const contract = await getContract(tid, params.id);
   if (!contract) return notFound();
 
   return (

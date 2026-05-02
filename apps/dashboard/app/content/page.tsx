@@ -1,6 +1,7 @@
 import { Card, Badge, Button } from "@naples/ui";
 import { APP_URLS } from "@naples/mock-data";
 import { listEpisodes } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { ExternalLink, Instagram, Youtube, Facebook, Music2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,8 @@ const STATUS_TONE = {
 } as const;
 
 export default async function ContentPage() {
-  const episodes = await listEpisodes();
+  const tid = await getServerTenantId();
+  const episodes = await listEpisodes(tid);
   return (
     <main className="px-8 py-8">
       <header className="mb-6 flex items-end justify-between">

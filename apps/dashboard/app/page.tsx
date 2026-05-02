@@ -4,13 +4,15 @@ import { RevenueBarChart } from "@/components/RevenueBarChart";
 import { SocialGrowthChart } from "@/components/SocialGrowthChart";
 import { LEAD_STAGES } from "@naples/mock-data";
 import { listBookings, listLeads, getMrr, getRoadmap, getSocialGrowth } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { CircleDollarSign, Users, CalendarCheck, TrendingUp, CheckCircle2, Circle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
+  const tid = await getServerTenantId();
   const [bookings, leads, mrr, roadmap, social] = await Promise.all([
-    listBookings(), listLeads(), getMrr(), getRoadmap(), getSocialGrowth(),
+    listBookings(tid), listLeads(tid), getMrr(tid), getRoadmap(tid), getSocialGrowth(tid),
   ]);
   const recent = bookings.slice(0, 5);
 

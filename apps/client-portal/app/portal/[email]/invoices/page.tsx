@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Card, Badge } from "@naples/ui";
 import { listInvoicesForEmail } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { Receipt, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function InvoicesPage({ params }: { params: { email: string } }) {
   const email = decodeURIComponent(params.email);
-  const invoices = await listInvoicesForEmail(email);
+  const tid = await getServerTenantId();
+  const invoices = await listInvoicesForEmail(tid, email);
   const totalOpen = invoices.filter((i) => i.status === "open" || i.status === "overdue").reduce((s, i) => s + Number(i.total), 0);
   const totalPaid = invoices.filter((i) => i.status === "paid").reduce((s, i) => s + Number(i.total), 0);
 

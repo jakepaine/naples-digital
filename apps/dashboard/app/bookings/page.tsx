@@ -1,12 +1,14 @@
 import { Card, Badge } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
 import { listBookings } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { CalendarCheck, CircleDollarSign, TrendingUp } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function BookingsPage() {
-  const bookings = await listBookings();
+  const tid = await getServerTenantId();
+  const bookings = await listBookings(tid);
   const total = bookings.reduce((s, b) => s + b.revenue, 0);
   const monthBookings = bookings.filter((b) => b.date.startsWith("2025-05"));
   const monthTotal = monthBookings.reduce((s, b) => s + b.revenue, 0);

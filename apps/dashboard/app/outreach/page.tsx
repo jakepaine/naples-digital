@@ -2,12 +2,14 @@ import { Card, Button } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
 import { APP_URLS } from "@naples/mock-data";
 import { getOutreachStats } from "@naples/db";
+import { getServerTenantId } from "@naples/db/next";
 import { Mail, Eye, Reply, CalendarCheck, ExternalLink } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function OutreachPage() {
-  const stats = await getOutreachStats();
+  const tid = await getServerTenantId();
+  const stats = await getOutreachStats(tid);
   const sent = Math.max(stats.emailsSentThisWeek, 1); // avoid divide-by-zero
   return (
     <main className="px-8 py-8">
