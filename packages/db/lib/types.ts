@@ -19,15 +19,15 @@ export type Database = {
         Relationships: []
       }
       clips: {
-        Row: { caption: string; created_at: string; episode_id: string; hook: string; id: string; platform: string; source: string; status: string; tenant_id: string }
-        Insert: { caption: string; created_at?: string; episode_id: string; hook: string; id?: string; platform: string; source?: string; status?: string; tenant_id: string }
-        Update: { caption?: string; created_at?: string; episode_id?: string; hook?: string; id?: string; platform?: string; source?: string; status?: string; tenant_id?: string }
+        Row: { caption: string; created_at: string; end_seconds: number | null; episode_id: string; hook: string; id: string; platform: string; source: string; start_seconds: number | null; status: string; tenant_id: string; thumbnail_url: string | null; video_url: string | null; word_timestamps: Json | null }
+        Insert: { caption: string; created_at?: string; end_seconds?: number | null; episode_id: string; hook: string; id?: string; platform: string; source?: string; start_seconds?: number | null; status?: string; tenant_id: string; thumbnail_url?: string | null; video_url?: string | null; word_timestamps?: Json | null }
+        Update: { caption?: string; created_at?: string; end_seconds?: number | null; episode_id?: string; hook?: string; id?: string; platform?: string; source?: string; start_seconds?: number | null; status?: string; tenant_id?: string; thumbnail_url?: string | null; video_url?: string | null; word_timestamps?: Json | null }
         Relationships: []
       }
       content_submissions: {
-        Row: { asset_type: string; client_email: string; client_name: string; created_at: string; delivered_at: string | null; delivery_url: string | null; description: string | null; duration_seconds: number | null; edit_brief: string | null; editor_notes: string | null; id: string; source_url: string | null; status: string; submitted_at: string; tenant_id: string; title: string }
-        Insert: { asset_type?: string; client_email: string; client_name: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; id?: string; source_url?: string | null; status?: string; submitted_at?: string; tenant_id: string; title: string }
-        Update: { asset_type?: string; client_email?: string; client_name?: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; id?: string; source_url?: string | null; status?: string; submitted_at?: string; tenant_id?: string; title?: string }
+        Row: { asset_type: string; client_email: string; client_name: string; created_at: string; delivered_at: string | null; delivery_url: string | null; description: string | null; duration_seconds: number | null; edit_brief: string | null; editor_notes: string | null; episode_id: string | null; id: string; source_url: string | null; status: string; storage_path: string | null; submitted_at: string; tenant_id: string; title: string }
+        Insert: { asset_type?: string; client_email: string; client_name: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; episode_id?: string | null; id?: string; source_url?: string | null; status?: string; storage_path?: string | null; submitted_at?: string; tenant_id: string; title: string }
+        Update: { asset_type?: string; client_email?: string; client_name?: string; created_at?: string; delivered_at?: string | null; delivery_url?: string | null; description?: string | null; duration_seconds?: number | null; edit_brief?: string | null; editor_notes?: string | null; episode_id?: string | null; id?: string; source_url?: string | null; status?: string; storage_path?: string | null; submitted_at?: string; tenant_id?: string; title?: string }
         Relationships: []
       }
       contracts: {
@@ -37,9 +37,15 @@ export type Database = {
         Relationships: []
       }
       episodes: {
-        Row: { clips_cut: number; clips_posted: number; created_at: string; guest: string; guest_title: string; id: string; platforms: string[]; record_date: string; show: string; status: string; tenant_id: string; title: string; updated_at: string }
-        Insert: { clips_cut?: number; clips_posted?: number; created_at?: string; guest: string; guest_title?: string; id?: string; platforms?: string[]; record_date: string; show: string; status: string; tenant_id: string; title: string; updated_at?: string }
-        Update: { clips_cut?: number; clips_posted?: number; created_at?: string; guest?: string; guest_title?: string; id?: string; platforms?: string[]; record_date?: string; show?: string; status?: string; tenant_id?: string; title?: string; updated_at?: string }
+        Row: { clips_cut: number; clips_posted: number; created_at: string; duration_seconds: number | null; guest: string; guest_title: string; id: string; platforms: string[]; processing_state: string; raw_video_url: string | null; record_date: string; show: string; status: string; tenant_id: string; title: string; transcript: Json | null; transcript_url: string | null; updated_at: string }
+        Insert: { clips_cut?: number; clips_posted?: number; created_at?: string; duration_seconds?: number | null; guest: string; guest_title?: string; id?: string; platforms?: string[]; processing_state?: string; raw_video_url?: string | null; record_date: string; show: string; status: string; tenant_id: string; title: string; transcript?: Json | null; transcript_url?: string | null; updated_at?: string }
+        Update: { clips_cut?: number; clips_posted?: number; created_at?: string; duration_seconds?: number | null; guest?: string; guest_title?: string; id?: string; platforms?: string[]; processing_state?: string; raw_video_url?: string | null; record_date?: string; show?: string; status?: string; tenant_id?: string; title?: string; transcript?: Json | null; transcript_url?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      render_jobs: {
+        Row: { clip_id: string; completed_at: string | null; created_at: string; episode_id: string; error: string | null; ffmpeg_log: string | null; id: string; started_at: string | null; state: string; tenant_id: string }
+        Insert: { clip_id: string; completed_at?: string | null; created_at?: string; episode_id: string; error?: string | null; ffmpeg_log?: string | null; id?: string; started_at?: string | null; state?: string; tenant_id: string }
+        Update: { clip_id?: string; completed_at?: string | null; created_at?: string; episode_id?: string; error?: string | null; ffmpeg_log?: string | null; id?: string; started_at?: string | null; state?: string; tenant_id?: string }
         Relationships: []
       }
       invoices: {

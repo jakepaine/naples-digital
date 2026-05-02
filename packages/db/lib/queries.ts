@@ -413,6 +413,144 @@ export async function markInvoicePaid(tenantId: string, id: string, method = "ca
 }
 
 // ============================================================
+// PHASE 8 — Track B: real content pipeline (storage paths, transcripts, render jobs)
+// ============================================================
+
+type RenderJobRow = Database["public"]["Tables"]["render_jobs"]["Row"];
+export type RenderJob = RenderJobRow;
+
+export async function setEpisodeRawVideo(tenantId: string, episodeId: string, storagePath: string, durationSeconds?: number): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const update: Record<string, unknown> = {
+    raw_video_url: storagePath,
+    processing_state: "uploaded",
+  };
+  if (durationSeconds) update.duration_seconds = durationSeconds;
+  const { error } = await sb.from("episodes").update(update as never).eq("id", episodeId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function setEpisodeProcessingState(tenantId: string, episodeId: string, state: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("episodes").update({ processing_state: state } as never).eq("id", episodeId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function setEpisodeTranscript(tenantId: string, episodeId: string, transcript: unknown): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("episodes").update({
+    transcript: transcript as never,
+    processing_state: "transcribed",
+  }).eq("id", episodeId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function getEpisodeTranscript(tenantId: string, episodeId: string): Promise<unknown> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data } = await sb.from("episodes").select("transcript").eq("id", episodeId).eq("tenant_id", tenantId).single();
+  return data?.transcript ?? null;
+}
+
+export async function createTimestampedClip(tenantId: string, input: {
+  episode_id: string;
+  hook: string;
+  caption: string;
+  platform: string;
+  start_seconds: number;
+  end_seconds: number;
+  word_timestamps?: unknown;
+  source: "api" | "mock" | "fallback";
+}): Promise<{ id: string } | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("clips").insert({
+    tenant_id: tenantId,
+    episode_id: input.episode_id,
+    hook: input.hook,
+    caption: input.caption,
+    platform: input.platform,
+    start_seconds: input.start_seconds,
+    end_seconds: input.end_seconds,
+    word_timestamps: input.word_timestamps as never,
+    source: input.source,
+  }).select("id").single();
+  if (error) return null;
+  return { id: data.id };
+}
+
+export async function setClipVideoUrl(tenantId: string, clipId: string, videoUrl: string, thumbnailUrl?: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const update: Record<string, unknown> = { video_url: videoUrl };
+  if (thumbnailUrl) update.thumbnail_url = thumbnailUrl;
+  const { error } = await sb.from("clips").update(update as never).eq("id", clipId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function enqueueRender(tenantId: string, episodeId: string, clipId: string): Promise<RenderJob | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("render_jobs").insert({
+    tenant_id: tenantId, episode_id: episodeId, clip_id: clipId, state: "queued",
+  }).select("*").single();
+  if (error) return null;
+  return data;
+}
+
+export async function nextRenderJob(): Promise<RenderJob | null> {
+  // Used by the render-worker. Cross-tenant: pull whatever's queued first.
+  // Atomically claim by setting state='running' so two workers don't race.
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data: candidate } = await sb.from("render_jobs").select("*").eq("state", "queued").order("created_at").limit(1).maybeSingle();
+  if (!candidate) return null;
+  const { data: claimed } = await sb.from("render_jobs")
+    .update({ state: "running", started_at: new Date().toISOString() })
+    .eq("id", candidate.id).eq("state", "queued").select("*").maybeSingle();
+  return claimed ?? null;
+}
+
+export async function markRenderDone(jobId: string, log?: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("render_jobs").update({
+    state: "done", completed_at: new Date().toISOString(),
+    ...(log ? { ffmpeg_log: log } : {}),
+  } as never).eq("id", jobId);
+  return !error;
+}
+
+export async function markRenderFailed(jobId: string, error: string, log?: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error: e } = await sb.from("render_jobs").update({
+    state: "failed", completed_at: new Date().toISOString(), error,
+    ...(log ? { ffmpeg_log: log } : {}),
+  } as never).eq("id", jobId);
+  return !e;
+}
+
+export async function listRenderJobsForEpisode(tenantId: string, episodeId: string): Promise<RenderJob[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("render_jobs").select("*").eq("tenant_id", tenantId).eq("episode_id", episodeId).order("created_at");
+  return data ?? [];
+}
+
+export async function attachUploadToSubmission(tenantId: string, submissionId: string, storagePath: string, sourceUrl?: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const update: Record<string, unknown> = { storage_path: storagePath };
+  if (sourceUrl) update.source_url = sourceUrl;
+  const { error } = await sb.from("content_submissions").update(update as never).eq("id", submissionId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+// ============================================================
 // PHASE 8 — Track A: outreach sequences, email sends, enrichment
 // ============================================================
 

@@ -13,6 +13,8 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@naples/db": "workspace:*",
     "@naples/mock-data": "workspace:*",
+    "@naples/storage": "workspace:*",
+    "@naples/transcription": "workspace:*",
     "@naples/ui": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",

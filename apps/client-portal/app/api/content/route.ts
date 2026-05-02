@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSubmission } from "@naples/db";
+import { createSubmission, attachUploadToSubmission } from "@naples/db";
 import { getRequestTenantId } from "@naples/db/next";
 
 export const runtime = "nodejs";
@@ -13,6 +13,7 @@ interface Body {
   asset_type?: "video" | "audio" | "image" | "document";
   source_url?: string;
   edit_brief?: string;
+  storage_path?: string;
 }
 
 export async function POST(req: Request) {
@@ -25,5 +26,8 @@ export async function POST(req: Request) {
   }
   const tid = await getRequestTenantId(req);
   const created = await createSubmission(tid, body);
+  if (created && body.storage_path) {
+    await attachUploadToSubmission(tid, created.id, body.storage_path, body.source_url);
+  }
   return NextResponse.json({ ok: !!created, submission: created });
 }

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Clapperboard, Copy, Check, Sparkles, Instagram, Youtube, Facebook, Music2, Star } from "lucide-react";
+import { Clapperboard, Copy, Check, Sparkles, Instagram, Youtube, Facebook, Music2, Star, Download, Play } from "lucide-react";
 import { Button } from "@naples/ui";
 
 interface Clip {
@@ -11,6 +11,10 @@ interface Clip {
   platform: "instagram" | "tiktok" | "youtube" | "facebook" | "best";
   status: "draft" | "posted";
   source: "api" | "mock" | "fallback";
+  video_url?: string | null;
+  thumbnail_url?: string | null;
+  start_seconds?: number | null;
+  end_seconds?: number | null;
 }
 
 const PLATFORM_META: Record<Clip["platform"], { label: string; Icon: typeof Star }> = {
@@ -126,14 +130,35 @@ export function ClipsRow({ episodeId }: { episodeId: string }) {
           const meta = PLATFORM_META[c.platform];
           const Icon = meta.Icon;
           const posted = c.status === "posted";
+          const hasVideo = !!c.video_url;
+          const dur = c.start_seconds != null && c.end_seconds != null ? Math.round(c.end_seconds - c.start_seconds) : null;
           return (
             <div key={c.id} className={`border p-3 ${posted ? "border-emerald/40 bg-emerald/5" : "border-card-border bg-bg"}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-gold">
                   <Icon className="h-3 w-3" /> {meta.label}
                 </div>
-                {posted && <span className="text-[10px] text-emerald">Posted</span>}
+                <div className="flex items-center gap-2">
+                  {dur != null && <span className="text-[10px] text-muted">{dur}s</span>}
+                  {posted && <span className="text-[10px] text-emerald">Posted</span>}
+                  {!hasVideo && c.start_seconds != null && <span className="text-[10px] text-amber">Rendering…</span>}
+                </div>
               </div>
+              {hasVideo ? (
+                <div className="mt-2 aspect-[9/16] w-full overflow-hidden bg-black">
+                  <video
+                    src={`/api/clips/${c.id}/video`}
+                    poster={c.thumbnail_url ?? undefined}
+                    controls
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="mt-2 flex aspect-[9/16] w-full items-center justify-center bg-bg/50 text-muted">
+                  <Play className="h-6 w-6" />
+                </div>
+              )}
               <div className="mt-2 text-sm font-medium text-cream">{c.hook}</div>
               <div className="mt-2 line-clamp-3 text-[11px] text-cream/70">{c.caption}</div>
               <div className="mt-3 flex items-center justify-between text-[10px]">
@@ -143,14 +168,24 @@ export function ClipsRow({ episodeId }: { episodeId: string }) {
                 >
                   {copied === c.id ? (<><Check className="h-3 w-3 text-emerald" /> Copied</>) : (<><Copy className="h-3 w-3" /> Copy</>)}
                 </button>
-                {!posted && (
-                  <button
-                    onClick={() => markPosted(c.id)}
-                    className="text-emerald transition-colors hover:text-cream"
-                  >
-                    Mark posted
-                  </button>
-                )}
+                <div className="flex items-center gap-3">
+                  {hasVideo && (
+                    <a
+                      href={`/api/clips/${c.id}/video?download=1`}
+                      className="flex items-center gap-1 text-gold transition-colors hover:text-cream"
+                    >
+                      <Download className="h-3 w-3" /> Download
+                    </a>
+                  )}
+                  {!posted && (
+                    <button
+                      onClick={() => markPosted(c.id)}
+                      className="text-emerald transition-colors hover:text-cream"
+                    >
+                      Mark posted
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
