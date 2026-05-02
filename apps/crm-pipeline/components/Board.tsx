@@ -12,16 +12,22 @@ import {
   useDroppable,
   closestCorners,
 } from "@dnd-kit/core";
-import { Card, Badge } from "@naples/ui";
+import { Card, Badge, Button } from "@naples/ui";
 import { LEAD_STAGES, Lead, LeadStage } from "@naples/mock-data";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Plus, FileText } from "lucide-react";
 import clsx from "clsx";
 import { AngleModal } from "./AngleModal";
+import { LeadDrawer } from "./LeadDrawer";
+import { AddLeadModal } from "./AddLeadModal";
+import { useRouter } from "next/navigation";
 
 export function Board({ initialLeads }: { initialLeads: Lead[] }) {
+  const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [angleLeadId, setAngleLeadId] = useState<string | null>(null);
+  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   function handleStart(e: DragStartEvent) {
@@ -55,14 +61,31 @@ export function Board({ initialLeads }: { initialLeads: Lead[] }) {
 
   return (
     <div className="px-6 py-12">
-      <header className="mx-auto mb-8 max-w-7xl">
-        <div className="text-[10px] uppercase tracking-[0.32em] text-gold">Sales Engine</div>
-        <h1 className="mt-3 font-heading text-5xl text-cream">Lead Management</h1>
-        <div className="mt-3 h-px w-16 bg-gold" />
-        <p className="mt-4 max-w-2xl text-sm text-cream/70">
-          Drag any lead between stages. Column totals update in real time. This board is the
-          GoHighLevel-style replacement Naples Digital builds for every client.
-        </p>
+      <header className="mx-auto mb-8 max-w-7xl flex items-end justify-between gap-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.32em] text-gold">Sales Engine</div>
+          <h1 className="mt-3 font-heading text-5xl text-cream">Lead Management</h1>
+          <div className="mt-3 h-px w-16 bg-gold" />
+          <p className="mt-4 max-w-2xl text-sm text-cream/70">
+            Drag any lead between stages. Click a card to open enrichment, sequence, and send timeline.
+            Drop a CSV to import in bulk.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button onClick={() => setShowAdd(true)}>
+            <Plus className="-ml-1 mr-1 inline h-4 w-4" />Add Lead
+          </Button>
+          <label className="cursor-pointer border border-card-border px-6 py-3 text-center text-sm uppercase tracking-wider text-cream/70 transition-colors hover:border-gold hover:text-gold">
+            <FileText className="-ml-1 mr-1 inline h-4 w-4" />
+            Import CSV
+            <input type="file" accept=".csv" className="hidden" onChange={async (e) => {
+              const f = e.target.files?.[0]; if (!f) return;
+              const text = await f.text();
+              const res = await fetch("/api/leads/import", { method: "POST", body: text });
+              if (res.ok) router.refresh();
+            }} />
+          </label>
+        </div>
       </header>
 
       <section className="mx-auto mb-8 grid max-w-7xl grid-cols-1 gap-4 md:grid-cols-3">
@@ -79,6 +102,7 @@ export function Board({ initialLeads }: { initialLeads: Lead[] }) {
               stage={stage}
               leads={leads.filter((l) => l.stage === stage)}
               onGenerateAngle={(id) => setAngleLeadId(id)}
+              onOpen={(id) => setOpenLeadId(id)}
             />
           ))}
         </div>
@@ -93,11 +117,20 @@ export function Board({ initialLeads }: { initialLeads: Lead[] }) {
           onClose={() => setAngleLeadId(null)}
         />
       )}
+      {openLeadId && (
+        <LeadDrawer leadId={openLeadId} onClose={() => setOpenLeadId(null)} />
+      )}
+      {showAdd && (
+        <AddLeadModal
+          onClose={() => setShowAdd(false)}
+          onCreated={(id) => { setShowAdd(false); router.refresh(); setOpenLeadId(id); }}
+        />
+      )}
     </div>
   );
 }
 
-function Column({ stage, leads, onGenerateAngle }: { stage: LeadStage; leads: Lead[]; onGenerateAngle?: (id: string) => void }) {
+function Column({ stage, leads, onGenerateAngle, onOpen }: { stage: LeadStage; leads: Lead[]; onGenerateAngle?: (id: string) => void; onOpen?: (id: string) => void }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
   const total = leads.reduce((s, l) => s + l.value, 0);
   return (
@@ -117,14 +150,14 @@ function Column({ stage, leads, onGenerateAngle }: { stage: LeadStage; leads: Le
       </div>
       <div className="min-h-[400px] space-y-2 p-3">
         {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} onGenerateAngle={onGenerateAngle} />
+          <LeadCard key={lead.id} lead={lead} onGenerateAngle={onGenerateAngle} onOpen={onOpen} />
         ))}
       </div>
     </div>
   );
 }
 
-function LeadCard({ lead, dragging, onGenerateAngle }: { lead: Lead; dragging?: boolean; onGenerateAngle?: (id: string) => void }) {
+function LeadCard({ lead, dragging, onGenerateAngle, onOpen }: { lead: Lead; dragging?: boolean; onGenerateAngle?: (id: string) => void; onOpen?: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: lead.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const hidden = isDragging && !dragging;
@@ -151,18 +184,29 @@ function LeadCard({ lead, dragging, onGenerateAngle }: { lead: Lead; dragging?: 
       </div>
       <div className="mt-2 flex items-center justify-between text-[10px] text-muted">
         <span>Day {lead.daysInStage}</span>
-        {onGenerateAngle && !dragging && (
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              onGenerateAngle(lead.id);
-            }}
-            className="flex items-center gap-1 border border-card-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-gold/60 hover:text-gold"
-          >
-            <Sparkles className="h-3 w-3" /> Angle
-          </button>
+        {!dragging && (
+          <div className="flex items-center gap-1">
+            {onOpen && (
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onOpen(lead.id); }}
+                className="border border-card-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-gold/60 hover:text-gold"
+              >
+                Open
+              </button>
+            )}
+            {onGenerateAngle && (
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onGenerateAngle(lead.id); }}
+                className="flex items-center gap-1 border border-card-border px-2 py-1 text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-gold/60 hover:text-gold"
+              >
+                <Sparkles className="h-3 w-3" /> Angle
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -49,9 +49,33 @@ export type Database = {
         Relationships: []
       }
       leads: {
-        Row: { ai_angle: Json | null; created_at: string; days_in_stage: number; goal: string; id: string; name: string; source: string; stage: string; tenant_id: string; type: string; updated_at: string; value: number }
-        Insert: { ai_angle?: Json | null; created_at?: string; days_in_stage?: number; goal: string; id?: string; name: string; source: string; stage: string; tenant_id: string; type: string; updated_at?: string; value: number }
-        Update: { ai_angle?: Json | null; created_at?: string; days_in_stage?: number; goal?: string; id?: string; name?: string; source?: string; stage?: string; tenant_id?: string; type?: string; updated_at?: string; value?: number }
+        Row: { ai_angle: Json | null; created_at: string; days_in_stage: number; domain: string | null; enrichment_status: string; goal: string; id: string; name: string; primary_email: string | null; source: string; stage: string; tenant_id: string; type: string; updated_at: string; value: number }
+        Insert: { ai_angle?: Json | null; created_at?: string; days_in_stage?: number; domain?: string | null; enrichment_status?: string; goal: string; id?: string; name: string; primary_email?: string | null; source: string; stage: string; tenant_id: string; type: string; updated_at?: string; value: number }
+        Update: { ai_angle?: Json | null; created_at?: string; days_in_stage?: number; domain?: string | null; enrichment_status?: string; goal?: string; id?: string; name?: string; primary_email?: string | null; source?: string; stage?: string; tenant_id?: string; type?: string; updated_at?: string; value?: number }
+        Relationships: []
+      }
+      lead_emails: {
+        Row: { created_at: string; email: string; id: string; lead_id: string; primary_address: boolean; tenant_id: string }
+        Insert: { created_at?: string; email: string; id?: string; lead_id: string; primary_address?: boolean; tenant_id: string }
+        Update: { created_at?: string; email?: string; id?: string; lead_id?: string; primary_address?: boolean; tenant_id?: string }
+        Relationships: []
+      }
+      lead_enrichment: {
+        Row: { fetched_at: string; id: string; lead_id: string; raw: Json; source: string; tenant_id: string }
+        Insert: { fetched_at?: string; id?: string; lead_id: string; raw?: Json; source: string; tenant_id: string }
+        Update: { fetched_at?: string; id?: string; lead_id?: string; raw?: Json; source?: string; tenant_id?: string }
+        Relationships: []
+      }
+      outreach_sequences: {
+        Row: { completed_at: string | null; config: Json; created_at: string; emails: Json; external_id: string | null; id: string; lead_id: string; pushed_at: string | null; state: string; tenant_id: string; updated_at: string; vendor: string }
+        Insert: { completed_at?: string | null; config?: Json; created_at?: string; emails?: Json; external_id?: string | null; id?: string; lead_id: string; pushed_at?: string | null; state?: string; tenant_id: string; updated_at?: string; vendor: string }
+        Update: { completed_at?: string | null; config?: Json; created_at?: string; emails?: Json; external_id?: string | null; id?: string; lead_id?: string; pushed_at?: string | null; state?: string; tenant_id?: string; updated_at?: string; vendor?: string }
+        Relationships: []
+      }
+      email_sends: {
+        Row: { bounced_at: string | null; clicked_at: string | null; created_at: string; external_id: string | null; id: string; lead_email: string; lead_id: string; opened_at: string | null; replied_at: string | null; reply_body: string | null; scheduled_for: string | null; sent_at: string | null; sequence_id: string; step: number; tenant_id: string; vendor_status: string | null }
+        Insert: { bounced_at?: string | null; clicked_at?: string | null; created_at?: string; external_id?: string | null; id?: string; lead_email: string; lead_id: string; opened_at?: string | null; replied_at?: string | null; reply_body?: string | null; scheduled_for?: string | null; sent_at?: string | null; sequence_id: string; step: number; tenant_id: string; vendor_status?: string | null }
+        Update: { bounced_at?: string | null; clicked_at?: string | null; created_at?: string; external_id?: string | null; id?: string; lead_email?: string; lead_id?: string; opened_at?: string | null; replied_at?: string | null; reply_body?: string | null; scheduled_for?: string | null; sent_at?: string | null; sequence_id?: string; step?: number; tenant_id?: string; vendor_status?: string | null }
         Relationships: []
       }
       mrr: {

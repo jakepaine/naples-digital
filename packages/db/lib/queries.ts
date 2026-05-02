@@ -412,6 +412,184 @@ export async function markInvoicePaid(tenantId: string, id: string, method = "ca
   return !error;
 }
 
+// ============================================================
+// PHASE 8 — Track A: outreach sequences, email sends, enrichment
+// ============================================================
+
+type SequenceRow = Database["public"]["Tables"]["outreach_sequences"]["Row"];
+type EmailSendRow = Database["public"]["Tables"]["email_sends"]["Row"];
+type LeadEmailRow = Database["public"]["Tables"]["lead_emails"]["Row"];
+type EnrichmentRow = Database["public"]["Tables"]["lead_enrichment"]["Row"];
+
+export type OutreachSequence = SequenceRow;
+export type EmailSend = EmailSendRow;
+export type LeadEmailRecord = LeadEmailRow;
+export type LeadEnrichmentRecord = EnrichmentRow;
+
+export async function addLeadEmail(tenantId: string, leadId: string, email: string, primary = false): Promise<LeadEmailRecord | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("lead_emails").insert({
+    tenant_id: tenantId, lead_id: leadId, email, primary_address: primary,
+  }).select("*").single();
+  if (error) return null;
+  if (primary) {
+    await sb.from("leads").update({ primary_email: email }).eq("id", leadId).eq("tenant_id", tenantId);
+  }
+  return data;
+}
+
+export async function listLeadEmails(tenantId: string, leadId: string): Promise<LeadEmailRecord[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("lead_emails").select("*").eq("tenant_id", tenantId).eq("lead_id", leadId);
+  return data ?? [];
+}
+
+export async function setLeadDomain(tenantId: string, leadId: string, domain: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("leads").update({ domain }).eq("id", leadId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function setLeadEnrichmentStatus(tenantId: string, leadId: string, status: "none" | "pending" | "enriched" | "failed"): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("leads").update({ enrichment_status: status }).eq("id", leadId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function recordLeadEnrichment(tenantId: string, leadId: string, source: string, raw: Record<string, unknown>): Promise<LeadEnrichmentRecord | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("lead_enrichment")
+    .upsert({ tenant_id: tenantId, lead_id: leadId, source, raw: raw as never }, { onConflict: "lead_id,source" })
+    .select("*").single();
+  if (error) return null;
+  return data;
+}
+
+export async function getLatestEnrichment(tenantId: string, leadId: string): Promise<LeadEnrichmentRecord | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data } = await sb.from("lead_enrichment").select("*")
+    .eq("tenant_id", tenantId).eq("lead_id", leadId)
+    .order("fetched_at", { ascending: false }).limit(1).maybeSingle();
+  return data ?? null;
+}
+
+export async function createSequence(tenantId: string, input: {
+  lead_id: string;
+  vendor: "instantly" | "smartlead" | "manual";
+  emails: Array<{ step: number; subject: string; body: string; delay_days?: number }>;
+  config?: Record<string, unknown>;
+}): Promise<OutreachSequence | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("outreach_sequences").insert({
+    tenant_id: tenantId,
+    lead_id: input.lead_id,
+    vendor: input.vendor,
+    state: "draft",
+    emails: input.emails as never,
+    config: (input.config ?? {}) as never,
+  }).select("*").single();
+  if (error) return null;
+  return data;
+}
+
+export async function markSequencePushed(tenantId: string, sequenceId: string, externalId: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("outreach_sequences").update({
+    external_id: externalId, state: "pushed", pushed_at: new Date().toISOString(),
+  }).eq("id", sequenceId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function updateSequenceState(tenantId: string, sequenceId: string, state: string): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const { error } = await sb.from("outreach_sequences").update({
+    state, ...(state === "completed" || state === "replied" ? { completed_at: new Date().toISOString() } : {}),
+  }).eq("id", sequenceId).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function listSequencesForLead(tenantId: string, leadId: string): Promise<OutreachSequence[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("outreach_sequences").select("*").eq("tenant_id", tenantId).eq("lead_id", leadId).order("created_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function getSequenceByExternalId(externalId: string): Promise<OutreachSequence | null> {
+  // Used by webhook receivers — looked up by vendor's id, returns the row
+  // including tenant_id so subsequent ops are scoped.
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data } = await sb.from("outreach_sequences").select("*").eq("external_id", externalId).maybeSingle();
+  return data ?? null;
+}
+
+export async function createEmailSend(tenantId: string, input: {
+  sequence_id: string;
+  lead_id: string;
+  lead_email: string;
+  step: number;
+  external_id?: string;
+  scheduled_for?: string;
+}): Promise<EmailSend | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("email_sends").insert({
+    tenant_id: tenantId,
+    sequence_id: input.sequence_id,
+    lead_id: input.lead_id,
+    lead_email: input.lead_email,
+    step: input.step,
+    external_id: input.external_id,
+    scheduled_for: input.scheduled_for,
+  }).select("*").single();
+  if (error) return null;
+  return data;
+}
+
+export async function recordEmailEvent(input: {
+  externalSendId: string;
+  kind: "sent" | "opened" | "clicked" | "replied" | "bounced";
+  ts?: string;
+  vendorStatus?: string;
+  replyBody?: string;
+}): Promise<boolean> {
+  if (!hasSupabase()) return true;
+  const sb = createServerClient();
+  const ts = input.ts ?? new Date().toISOString();
+  const update: Record<string, unknown> = { vendor_status: input.vendorStatus };
+  if (input.kind === "sent") update.sent_at = ts;
+  if (input.kind === "opened") update.opened_at = ts;
+  if (input.kind === "clicked") update.clicked_at = ts;
+  if (input.kind === "replied") { update.replied_at = ts; if (input.replyBody) update.reply_body = input.replyBody; }
+  if (input.kind === "bounced") update.bounced_at = ts;
+  const { error } = await sb.from("email_sends").update(update as never).eq("external_id", input.externalSendId);
+  return !error;
+}
+
+export async function listSendsForSequence(tenantId: string, sequenceId: string): Promise<EmailSend[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("email_sends").select("*").eq("tenant_id", tenantId).eq("sequence_id", sequenceId).order("step");
+  return data ?? [];
+}
+
+export async function listSendsForLead(tenantId: string, leadId: string): Promise<EmailSend[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("email_sends").select("*").eq("tenant_id", tenantId).eq("lead_id", leadId).order("created_at");
+  return data ?? [];
+}
+
 // Content submissions
 export async function listSubmissionsForEmail(tenantId: string, email: string): Promise<ContentSubmission[]> {
   if (!hasSupabase()) return [];

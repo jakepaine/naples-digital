@@ -1,0 +1,20 @@
+{
+  "name": "@naples/enrichment",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./apollo": "./lib/apollo.ts",
+    "./clay": "./lib/clay.ts",
+    "./types": "./lib/types.ts"
+  },
+  "dependencies": {
+    "@naples/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.3"
+  }
+}
