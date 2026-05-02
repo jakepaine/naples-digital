@@ -7,6 +7,7 @@ import type {
   OutreachVendor, PushSequenceInput, PushSequenceResult,
   VendorEvent, WebhookParseResult, VendorKind,
 } from "./types";
+import { hmacSha256Hex, timingSafeEq } from "./hmac";
 
 const API_BASE = "https://server.smartlead.ai/api/v1";
 
@@ -105,10 +106,16 @@ export function createSmartleadVendor(opts: {
       }
     },
 
-    async verifyWebhookSignature(headers: Headers, _rawBody: string): Promise<boolean> {
-      if (!webhookSecret) return true;
-      const provided = headers.get("x-smartlead-signature") ?? headers.get("x-webhook-secret");
-      return provided === webhookSecret;
+    async verifyWebhookSignature(headers: Headers, rawBody: string): Promise<boolean> {
+      if (!webhookSecret) return false;
+      const sigHeader = headers.get("x-smartlead-signature");
+      if (sigHeader) {
+        const expected = await hmacSha256Hex(webhookSecret, rawBody);
+        return timingSafeEq(sigHeader.replace(/^sha256=/, ""), expected);
+      }
+      const fallback = headers.get("x-webhook-secret");
+      if (fallback) return timingSafeEq(fallback, webhookSecret);
+      return false;
     },
   };
 }

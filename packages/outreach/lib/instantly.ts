@@ -13,6 +13,7 @@ import type {
   OutreachVendor, PushSequenceInput, PushSequenceResult,
   VendorEvent, WebhookParseResult, VendorKind,
 } from "./types";
+import { hmacSha256Hex, timingSafeEq } from "./hmac";
 
 const API_BASE = "https://api.instantly.ai/api/v2";
 
@@ -132,11 +133,19 @@ export function createInstantlyVendor(opts: {
       }
     },
 
-    async verifyWebhookSignature(headers: Headers, _rawBody: string): Promise<boolean> {
-      if (!webhookSecret) return true; // no secret configured = accept (dev only)
-      // Instantly v2 puts the secret in a custom header, exact name set by tenant
-      const provided = headers.get("x-instantly-signature") ?? headers.get("x-webhook-secret");
-      return provided === webhookSecret;
+    async verifyWebhookSignature(headers: Headers, rawBody: string): Promise<boolean> {
+      if (!webhookSecret) return false; // no secret configured = reject in prod
+      // Instantly's signing scheme: HMAC-SHA256 of raw body using webhook secret,
+      // sent as hex in X-Instantly-Signature header. Some tenants prefer a static
+      // shared-secret header — accept either, prefer HMAC.
+      const sigHeader = headers.get("x-instantly-signature");
+      if (sigHeader) {
+        const expected = await hmacSha256Hex(webhookSecret, rawBody);
+        return timingSafeEq(sigHeader.replace(/^sha256=/, ""), expected);
+      }
+      const fallback = headers.get("x-webhook-secret");
+      if (fallback) return timingSafeEq(fallback, webhookSecret);
+      return false;
     },
   };
 }

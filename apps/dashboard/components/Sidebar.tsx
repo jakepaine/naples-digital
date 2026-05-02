@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import clsx from "clsx";
+import { useTenantBrand } from "@naples/ui";
 
 const ITEMS = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
@@ -24,12 +25,20 @@ const ITEMS = [
 
 export function Sidebar() {
   const path = usePathname();
+  const { tenantName, brand } = useTenantBrand();
   return (
     <aside className="hidden w-60 shrink-0 border-r border-card-border bg-bg lg:block">
       <div className="px-6 py-6">
         <div className="text-[10px] uppercase tracking-[0.22em] text-muted">Operations</div>
-        <div className="mt-1 font-heading text-xl text-cream">Kevin · 239 Live</div>
-        <div className="mt-1 text-xs text-gold">Owner Dashboard</div>
+        <div className="mt-1 flex items-center gap-2">
+          <span
+            aria-hidden
+            className="inline-block h-2.5 w-2.5"
+            style={{ background: brand.primary_color }}
+          />
+          <div className="font-heading text-xl text-cream">{tenantName}</div>
+        </div>
+        <div className="mt-1 text-xs" style={{ color: brand.primary_color }}>Operator Dashboard</div>
       </div>
       <nav className="px-3 pb-6">
         {ITEMS.map((item) => {

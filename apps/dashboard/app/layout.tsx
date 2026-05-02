@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { BrandFrame } from "@naples/ui";
+import { BrandFrame, TenantBrandProvider } from "@naples/ui";
+import { getServerTenant } from "@naples/db/next";
 import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
@@ -19,22 +20,30 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Kevin's Dashboard · 239 Live",
-  description: "Operations hub for the entire 239 Live business",
+  title: "Operator Dashboard · Naples Digital",
+  description: "Multi-tenant operations hub",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const tenant = await getServerTenant();
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
-        <BrandFrame>
-          <div className="flex">
-            <Sidebar />
-            <div className="min-h-screen flex-1 overflow-x-hidden">
-              {children}
+        <TenantBrandProvider value={{
+          tenantId: tenant.id,
+          tenantSlug: tenant.slug,
+          tenantName: tenant.name,
+          brand: tenant.brand,
+        }}>
+          <BrandFrame>
+            <div className="flex">
+              <Sidebar />
+              <div className="min-h-screen flex-1 overflow-x-hidden">
+                {children}
+              </div>
             </div>
-          </div>
-        </BrandFrame>
+          </BrandFrame>
+        </TenantBrandProvider>
       </body>
     </html>
   );

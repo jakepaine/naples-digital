@@ -106,13 +106,35 @@ export async function getRoadmap(tenantId: string): Promise<typeof MOCK_ROADMAP>
 export async function getOutreachStats(tenantId: string): Promise<typeof OUTREACH_STATS> {
   if (!hasSupabase()) return OUTREACH_STATS;
   const sb = createServerClient();
-  const { count: emailsSent } = await sb.from("outreach_runs").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId);
-  if (emailsSent === null) return OUTREACH_STATS;
+  // Real metrics from email_sends (post-Phase 8). Falls back to outreach_runs
+  // count for tenants that haven't started using the production sender yet.
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const [sentRes, opensRes, repliesRes] = await Promise.all([
+    sb.from("email_sends").select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId).gte("sent_at", weekAgo).not("sent_at", "is", null),
+    sb.from("email_sends").select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId).gte("opened_at", weekAgo).not("opened_at", "is", null),
+    sb.from("email_sends").select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId).gte("replied_at", weekAgo).not("replied_at", "is", null),
+  ]);
+  const sent = sentRes.count;
+  const opens = opensRes.count;
+  const replies = repliesRes.count;
+  if ((sent ?? 0) === 0 && (opens ?? 0) === 0 && (replies ?? 0) === 0) {
+    // Legacy fallback: count from outreach_runs (the demo audit log)
+    const { count: legacy } = await sb.from("outreach_runs").select("*", { count: "exact", head: true }).eq("tenant_id", tenantId);
+    return {
+      emailsSentThisWeek: legacy ?? 0,
+      opens: Math.floor((legacy ?? 0) * 0.25),
+      replies: Math.floor((legacy ?? 0) * 0.06),
+      meetingsBooked: Math.floor((legacy ?? 0) * 0.02),
+    };
+  }
   return {
-    emailsSentThisWeek: emailsSent ?? 0,
-    opens: Math.floor((emailsSent ?? 0) * 0.25),
-    replies: Math.floor((emailsSent ?? 0) * 0.06),
-    meetingsBooked: Math.floor((emailsSent ?? 0) * 0.02),
+    emailsSentThisWeek: sent ?? 0,
+    opens: opens ?? 0,
+    replies: replies ?? 0,
+    meetingsBooked: Math.floor((replies ?? 0) * 0.4),
   };
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { BrandFrame, Nav } from "@naples/ui";
+import { BrandFrame, Nav, TenantBrandProvider } from "@naples/ui";
+import { getServerTenant } from "@naples/db/next";
 import "./globals.css";
 
 const heading = Bebas_Neue({
@@ -18,18 +19,23 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "239 Live System",
-  description: "Naples Digital × 239 Live — Southwest Florida's Media Home",
+  title: "Content Pipeline",
+  description: "Multi-tenant podcast pipeline — upload, transcribe, clip, render.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const tenant = await getServerTenant();
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
-        <BrandFrame>
-          <Nav active="content" />
-          {children}
-        </BrandFrame>
+        <TenantBrandProvider value={{
+          tenantId: tenant.id, tenantSlug: tenant.slug, tenantName: tenant.name, brand: tenant.brand,
+        }}>
+          <BrandFrame>
+            <Nav active="content" />
+            {children}
+          </BrandFrame>
+        </TenantBrandProvider>
       </body>
     </html>
   );
