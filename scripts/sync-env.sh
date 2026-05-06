@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Sets the canonical NEXT_PUBLIC_*_URL env vars on every Railway service
-# so each app's nav and CTAs link to real Railway URLs.
-# Also sets per-service RAILWAY_DOCKERFILE_PATH, ANTHROPIC_API_KEY, and Supabase keys.
+# Pushes env vars to every Railway service: NEXT_PUBLIC_*_URL cross-app links,
+# Supabase + Anthropic keys, RAILWAY_DOCKERFILE_PATH per service.
 #
-# Usage (loads .env.local automatically if present):
-#   bash scripts/sync-env.sh
+# Source of truth is Doppler (project: naples-digital, config: prd). Run via:
+#
+#   doppler run -- bash scripts/sync-env.sh
+#
+# That injects all prd secrets into env before this script runs. Legacy fallback:
+# if DOPPLER_PROJECT isn't set in env (i.e. not running under doppler run), the
+# script falls back to sourcing .env.local. New work should use Doppler.
+#
+# Long-term, the Doppler dashboard's Railway integration auto-syncs prd secrets
+# to all services and this script becomes only-needed for the
+# RAILWAY_DOCKERFILE_PATH per-service value.
 
-# Auto-load .env.local from repo root if present.
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-if [ -f "$ROOT_DIR/.env.local" ]; then
+if [ -z "${DOPPLER_PROJECT:-}" ] && [ -f "$ROOT_DIR/.env.local" ]; then
+  echo "⚠ not running under 'doppler run --' — falling back to .env.local. Prefer: doppler run -- bash scripts/sync-env.sh"
   # shellcheck disable=SC1091
   set -a; source "$ROOT_DIR/.env.local"; set +a
 fi

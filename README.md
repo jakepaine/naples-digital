@@ -66,9 +66,19 @@ pnpm --filter @naples/dashboard dev
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` in any app that needs custom values. Most apps don't need any — the cross-app links use `NEXT_PUBLIC_*_URL` env vars set on each Railway service.
+**Source of truth: Doppler** (project `naples-digital`, config `prd`). Local dev uses `doppler run --` to inject secrets; Railway services receive them via `bash scripts/sync-env.sh` (run inside `doppler run`) or the Doppler→Railway dashboard integration.
 
-The only secret used in production is `ANTHROPIC_API_KEY` for the outreach-demo. **If unset, the app falls through to a deterministic template generator that produces realistic-looking emails so the screen never breaks.**
+```bash
+# Run any command with prd secrets injected
+doppler run -- pnpm --filter @naples/dashboard dev
+
+# Push secrets to all 10 Railway services
+doppler run -- bash scripts/sync-env.sh
+```
+
+`.env.local` exists only as a legacy fallback for the sync script. New secrets go in Doppler, never `.env.local`. `.env.example` documents the variable names for reference.
+
+AI features (`outreach-demo`, `crm-pipeline`, `content-pipeline`, `sponsor-pitch`, `backlog`) read `ANTHROPIC_API_KEY`; if unset they fall back to deterministic mock generators so screens never break.
 
 ## AI features (Phase 6)
 

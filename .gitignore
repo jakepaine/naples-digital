@@ -44,3 +44,6 @@ Thumbs.db
 # Coverage
 coverage
 .nyc_output
+
+# Doppler local link (per-developer, not committed)
+.doppler
