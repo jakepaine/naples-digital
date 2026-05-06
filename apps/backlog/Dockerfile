@@ -16,6 +16,9 @@ FROM base AS builder
 COPY --from=deps /repo /repo
 COPY packages ./packages
 COPY apps/backlog ./apps/backlog
+# Suggest endpoint reads these at request time. Copy into the builder so the
+# next-stage COPY can pull them into the runtime image.
+COPY .build-state.md README.md ./
 WORKDIR /repo/apps/backlog
 RUN pnpm exec next build
 
