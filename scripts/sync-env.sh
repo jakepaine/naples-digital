@@ -24,6 +24,7 @@ CRM=https://crm-pipeline-production.up.railway.app
 CONTENT=https://content-pipeline-production-21b7.up.railway.app
 SPONSOR_PITCH="${NEXT_PUBLIC_SPONSOR_PITCH_URL:-https://sponsor-pitch-production.up.railway.app}"
 SPONSOR_ANALYTICS="${NEXT_PUBLIC_SPONSOR_ANALYTICS_URL:-https://sponsor-analytics-production.up.railway.app}"
+BACKLOG="${NEXT_PUBLIC_BACKLOG_URL:-https://backlog-production-2a84.up.railway.app}"
 
 ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
 SB_URL="${SUPABASE_URL:-}"
@@ -47,6 +48,7 @@ set_common() {
     --set "NEXT_PUBLIC_CONTENT_URL=$CONTENT"
     --set "NEXT_PUBLIC_SPONSOR_PITCH_URL=$SPONSOR_PITCH"
     --set "NEXT_PUBLIC_SPONSOR_ANALYTICS_URL=$SPONSOR_ANALYTICS"
+    --set "NEXT_PUBLIC_BACKLOG_URL=$BACKLOG"
   )
   if [ -n "$SB_URL" ];     then args+=( --set "SUPABASE_URL=$SB_URL" ); fi
   if [ -n "$SB_ANON" ];    then args+=( --set "SUPABASE_ANON_KEY=$SB_ANON" ); fi
@@ -75,23 +77,16 @@ set_ai_service  crm-pipeline       apps/crm-pipeline/Dockerfile
 set_ai_service  content-pipeline   apps/content-pipeline/Dockerfile
 set_ai_service  outreach-demo      apps/outreach-demo/Dockerfile
 
-# Phase 6 services — created later. Detect via `railway status --json` (which
-# lists all services), and skip silently if not yet provisioned.
-detect_service() {
-  railway status --json 2>/dev/null | grep -q "\"serviceName\": \"$1\""
-}
-if detect_service sponsor-pitch; then
-  set_ai_service sponsor-pitch       apps/sponsor-pitch/Dockerfile
-fi
-if detect_service sponsor-analytics; then
-  set_common     sponsor-analytics   apps/sponsor-analytics/Dockerfile
-fi
+# Phase 6+ services. All confirmed present in the project. (Previous detect_service
+# gating via `railway status --json` was flaky under repeated calls, so the
+# services are now hardcoded — sync-env will fail loudly if one is missing,
+# which is what we want.)
+set_ai_service  sponsor-pitch       apps/sponsor-pitch/Dockerfile
+set_common      sponsor-analytics   apps/sponsor-analytics/Dockerfile
 
 # Phase 9 — Naples Digital agency backlog. ADMIN_PASSWORD-gated, uses Anthropic
-# for the Suggest endpoint. Pass --set "ADMIN_PASSWORD=..." separately or via the
-# Railway dashboard once; sync-env doesn't manage it (it's an app-level secret).
-if detect_service backlog; then
-  set_ai_service backlog              apps/backlog/Dockerfile
-fi
+# for the Suggest endpoint. ADMIN_PASSWORD is set per service via the Railway
+# dashboard or `railway variable set --service backlog "ADMIN_PASSWORD=..."`.
+set_ai_service  backlog             apps/backlog/Dockerfile
 
 echo "✓ Env vars synced across all services."
