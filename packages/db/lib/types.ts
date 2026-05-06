@@ -164,7 +164,21 @@ export type Database = {
       }
     }
     Views: { [_ in never]: never }
-    Functions: { set_current_tenant: { Args: { tenant_id: string }; Returns: undefined } }
+    Functions: {
+      set_current_tenant: { Args: { tenant_id: string }; Returns: undefined }
+      delete_tenant_secret: {
+        Args: { p_kind: string; p_tenant_id: string }
+        Returns: boolean
+      }
+      get_tenant_secret: {
+        Args: { p_kind: string; p_tenant_id: string }
+        Returns: { out_config: Json; out_last_verified_at: string; out_secret: string; out_status: string }[]
+      }
+      set_tenant_secret: {
+        Args: { p_config?: Json; p_kind: string; p_secret: string; p_tenant_id: string }
+        Returns: { out_id: string; out_kind: string; out_last_verified_at: string; out_status: string; out_tenant_id: string }[]
+      }
+    }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }
   }

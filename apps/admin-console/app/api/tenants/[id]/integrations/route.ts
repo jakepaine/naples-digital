@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { upsertTenantIntegration, listTenantIntegrations } from "@naples/db";
+import {
+  upsertTenantIntegration,
+  listTenantIntegrations,
+  setTenantSecret,
+  type TenantIntegrationKind,
+} from "@naples/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,19 +19,38 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (!body?.kind) {
     return NextResponse.json({ error: "kind required" }, { status: 400 });
   }
-  // For now we store the secret directly in secret_ref. In production this should
-  // write to Supabase Vault or a KMS and store the ref. v1: direct storage on row,
-  // service-role only access — never exposed to client.
-  const secret_ref = typeof body.secret === "string" && body.secret.length > 0 ? body.secret : undefined;
+
+  const kind = body.kind as TenantIntegrationKind;
+  const config = body.config ?? {};
+  const secret = typeof body.secret === "string" && body.secret.length > 0 ? body.secret : null;
+
+  // If a secret was provided, route through Supabase Vault (set_tenant_secret RPC).
+  // The plaintext is encrypted at rest; tenant_integrations.secret_ref holds the
+  // vault.secrets uuid. Without a secret, just upsert config (no vault touch).
+  if (secret) {
+    const result = await setTenantSecret(params.id, kind, secret, config);
+    if (!result) return NextResponse.json({ error: "Failed to save secret" }, { status: 500 });
+    return NextResponse.json({
+      integration: {
+        id: result.id,
+        tenant_id: params.id,
+        kind,
+        status: result.status,
+        last_verified_at: result.last_verified_at,
+        secret_ref: "***",
+      },
+    });
+  }
+
+  // Config-only update (no secret rotation)
   const integration = await upsertTenantIntegration({
     tenant_id: params.id,
-    kind: body.kind,
-    config: body.config ?? {},
-    secret_ref,
-    status: secret_ref ? "verified" : "pending",
+    kind,
+    config,
+    status: "pending",
   });
   if (!integration) return NextResponse.json({ error: "Failed to save" }, { status: 500 });
-  // Don't echo the secret back
-  const { secret_ref: _omit, ...safe } = integration;
-  return NextResponse.json({ integration: { ...safe, secret_ref: _omit ? "***" : null } });
+  return NextResponse.json({
+    integration: { ...integration, secret_ref: integration.secret_ref ? "***" : null },
+  });
 }

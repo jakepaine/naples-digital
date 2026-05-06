@@ -254,6 +254,64 @@ export async function upsertTenantIntegration(input: {
   return (data as TenantIntegration) ?? null;
 }
 
+// ============================================================
+// Per-tenant secrets via Supabase Vault.
+// Backed by the SECURITY DEFINER functions in migration 0007.
+// Service-role only — these wrap RPC calls that decrypt vault values.
+// ============================================================
+
+export async function setTenantSecret(
+  tenantId: string,
+  kind: TenantIntegrationKind,
+  secret: string,
+  config: Record<string, unknown> = {}
+): Promise<{ id: string; status: string; last_verified_at: string | null } | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.rpc("set_tenant_secret", {
+    p_tenant_id: tenantId,
+    p_kind: kind,
+    p_secret: secret,
+    p_config: config as never,
+  });
+  if (error || !data || !Array.isArray(data) || data.length === 0) return null;
+  const row = data[0] as { out_id: string; out_status: string; out_last_verified_at: string | null };
+  return { id: row.out_id, status: row.out_status, last_verified_at: row.out_last_verified_at };
+}
+
+export async function getTenantSecret(
+  tenantId: string,
+  kind: TenantIntegrationKind
+): Promise<{ secret: string; config: Record<string, unknown>; status: string; last_verified_at: string | null } | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.rpc("get_tenant_secret", {
+    p_tenant_id: tenantId,
+    p_kind: kind,
+  });
+  if (error || !data || !Array.isArray(data) || data.length === 0) return null;
+  const row = data[0] as { out_secret: string; out_config: Record<string, unknown>; out_status: string; out_last_verified_at: string | null };
+  return {
+    secret: row.out_secret,
+    config: row.out_config ?? {},
+    status: row.out_status,
+    last_verified_at: row.out_last_verified_at,
+  };
+}
+
+export async function deleteTenantSecret(
+  tenantId: string,
+  kind: TenantIntegrationKind
+): Promise<boolean> {
+  if (!hasSupabase()) return false;
+  const sb = createServerClient();
+  const { data, error } = await sb.rpc("delete_tenant_secret", {
+    p_tenant_id: tenantId,
+    p_kind: kind,
+  });
+  return !error && data === true;
+}
+
 export async function createTenant(input: {
   slug: string;
   name: string;
