@@ -12,6 +12,12 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" }
   public: {
     Tables: {
+      backlog_items: {
+        Row: { completed_at: string | null; created_at: string; description: string | null; due_at: string | null; id: string; priority: string; sort_order: number; source: string; status: string; tags: string[]; tenant_id: string; title: string; updated_at: string }
+        Insert: { completed_at?: string | null; created_at?: string; description?: string | null; due_at?: string | null; id?: string; priority?: string; sort_order?: number; source?: string; status?: string; tags?: string[]; tenant_id: string; title: string; updated_at?: string }
+        Update: { completed_at?: string | null; created_at?: string; description?: string | null; due_at?: string | null; id?: string; priority?: string; sort_order?: number; source?: string; status?: string; tags?: string[]; tenant_id?: string; title?: string; updated_at?: string }
+        Relationships: []
+      }
       bookings: {
         Row: { client: string; created_at: string; date: string; id: string; package: string; revenue: number; status: string; tenant_id: string; time: string | null; updated_at: string }
         Insert: { client: string; created_at?: string; date: string; id?: string; package: string; revenue: number; status: string; tenant_id: string; time?: string | null; updated_at?: string }

@@ -15,6 +15,7 @@ A connected demo + production system showing what Naples Digital builds for 239 
 | **agency-site** | https://agency-site-production-35a2.up.railway.app | Naples Digital's own marketing site |
 | **sponsor-pitch** | https://sponsor-pitch-production.up.railway.app | AI sponsor one-pager builder — pitch any company in 30s |
 | **sponsor-analytics** | https://sponsor-analytics-production.up.railway.app | Per-sponsor private analytics portal at `/s/<magic-link-token>` |
+| **backlog** | https://backlog-production-2a84.up.railway.app | Naples Digital agency backlog — per-tenant tabs, AI Suggest scans repo state. Operator-gated. |
 
 ## Architecture
 

@@ -785,3 +785,146 @@ export async function createSubmission(tenantId: string, input: {
   if (error) return null;
   return data;
 }
+
+// ============================================================
+// PHASE 9 — Backlog: per-tenant agency work tracker
+// ============================================================
+
+type BacklogItemRow = Database["public"]["Tables"]["backlog_items"]["Row"];
+
+export type BacklogStatus = "backlog" | "in_progress" | "blocked" | "done";
+export type BacklogPriority = "P0" | "P1" | "P2" | "P3";
+export type BacklogSource = "manual" | "build-state" | "readme" | "git" | "github" | "suggest";
+
+export type BacklogItem = {
+  id: string;
+  tenant_id: string;
+  title: string;
+  description: string | null;
+  status: BacklogStatus;
+  priority: BacklogPriority;
+  source: BacklogSource;
+  tags: string[];
+  due_at: string | null;
+  completed_at: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+const rowToBacklogItem = (r: BacklogItemRow): BacklogItem => ({
+  id: r.id,
+  tenant_id: r.tenant_id,
+  title: r.title,
+  description: r.description,
+  status: r.status as BacklogStatus,
+  priority: r.priority as BacklogPriority,
+  source: r.source as BacklogSource,
+  tags: r.tags ?? [],
+  due_at: r.due_at,
+  completed_at: r.completed_at,
+  sort_order: r.sort_order,
+  created_at: r.created_at,
+  updated_at: r.updated_at,
+});
+
+// Sort: incomplete first by (priority asc, sort_order asc, created_at asc),
+// then done items at the bottom by completed_at desc. Done in JS — single
+// query, simple to reason about, fast at the volumes we care about.
+function backlogSort(items: BacklogItem[]): BacklogItem[] {
+  const pri = { P0: 0, P1: 1, P2: 2, P3: 3 };
+  const open = items.filter((i) => i.status !== "done");
+  const done = items.filter((i) => i.status === "done");
+  open.sort((a, b) => {
+    if (pri[a.priority] !== pri[b.priority]) return pri[a.priority] - pri[b.priority];
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+    return a.created_at.localeCompare(b.created_at);
+  });
+  done.sort((a, b) => (b.completed_at ?? "").localeCompare(a.completed_at ?? ""));
+  return [...open, ...done];
+}
+
+export async function listBacklogItems(tenantId: string): Promise<BacklogItem[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data, error } = await sb.from("backlog_items").select("*").eq("tenant_id", tenantId);
+  if (error || !data) return [];
+  return backlogSort(data.map(rowToBacklogItem));
+}
+
+export async function createBacklogItem(tenantId: string, input: {
+  title: string;
+  description?: string;
+  status?: BacklogStatus;
+  priority?: BacklogPriority;
+  source?: BacklogSource;
+  tags?: string[];
+  due_at?: string | null;
+}): Promise<BacklogItem | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("backlog_items").insert({
+    tenant_id: tenantId,
+    title: input.title,
+    description: input.description ?? null,
+    status: input.status ?? "backlog",
+    priority: input.priority ?? "P2",
+    source: input.source ?? "manual",
+    tags: input.tags ?? [],
+    due_at: input.due_at ?? null,
+  }).select("*").single();
+  if (error || !data) return null;
+  return rowToBacklogItem(data);
+}
+
+export async function updateBacklogItem(tenantId: string, id: string, patch: {
+  title?: string;
+  description?: string | null;
+  status?: BacklogStatus;
+  priority?: BacklogPriority;
+  tags?: string[];
+  due_at?: string | null;
+  sort_order?: number;
+}): Promise<BacklogItem | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const update: Record<string, unknown> = { ...patch };
+  // Stamp/clear completed_at when status crosses the done boundary
+  if (patch.status === "done") update.completed_at = new Date().toISOString();
+  if (patch.status && patch.status !== "done") update.completed_at = null;
+  const { data, error } = await sb.from("backlog_items")
+    .update(update as never)
+    .eq("id", id).eq("tenant_id", tenantId)
+    .select("*").single();
+  if (error || !data) return null;
+  return rowToBacklogItem(data);
+}
+
+export async function deleteBacklogItem(tenantId: string, id: string): Promise<boolean> {
+  if (!hasSupabase()) return false;
+  const sb = createServerClient();
+  const { error } = await sb.from("backlog_items").delete().eq("id", id).eq("tenant_id", tenantId);
+  return !error;
+}
+
+export async function bulkCreateBacklogItems(tenantId: string, items: Array<{
+  title: string;
+  description?: string;
+  priority?: BacklogPriority;
+  source?: BacklogSource;
+  tags?: string[];
+}>): Promise<BacklogItem[]> {
+  if (!hasSupabase() || items.length === 0) return [];
+  const sb = createServerClient();
+  const rows = items.map((i) => ({
+    tenant_id: tenantId,
+    title: i.title,
+    description: i.description ?? null,
+    priority: i.priority ?? "P2",
+    source: i.source ?? "manual",
+    tags: i.tags ?? [],
+  }));
+  const { data, error } = await sb.from("backlog_items").insert(rows).select("*");
+  if (error || !data) return [];
+  return data.map(rowToBacklogItem);
+}

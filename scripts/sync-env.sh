@@ -87,4 +87,11 @@ if detect_service sponsor-analytics; then
   set_common     sponsor-analytics   apps/sponsor-analytics/Dockerfile
 fi
 
+# Phase 9 — Naples Digital agency backlog. ADMIN_PASSWORD-gated, uses Anthropic
+# for the Suggest endpoint. Pass --set "ADMIN_PASSWORD=..." separately or via the
+# Railway dashboard once; sync-env doesn't manage it (it's an app-level secret).
+if detect_service backlog; then
+  set_ai_service backlog              apps/backlog/Dockerfile
+fi
+
 echo "✓ Env vars synced across all services."
