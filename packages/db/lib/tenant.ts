@@ -190,7 +190,9 @@ export async function resolveTenantBySlugOrDefault(slug: string | null | undefin
 // ============================================================
 export type TenantIntegrationKind =
   | "instantly" | "smartlead" | "apollo" | "clay"
-  | "assemblyai" | "opusclip" | "stripe" | "resend" | "buffer" | "publer";
+  | "assemblyai" | "opusclip" | "stripe" | "resend" | "buffer" | "publer"
+  | "klaviyo" | "meta" | "ghl"
+  | "apify" | "batchskiptracing" | "postmark";
 
 export type TenantIntegration = {
   id: string;

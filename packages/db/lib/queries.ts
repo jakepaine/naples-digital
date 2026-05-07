@@ -907,6 +907,209 @@ export async function deleteBacklogItem(tenantId: string, id: string): Promise<b
   return !error;
 }
 
+// ============================================================
+// PHASE 10 — Real estate / multifamily acquisition tooling (MIA)
+// ============================================================
+
+export type ReDealSource = "loopnet" | "crexi" | "broker_email" | "manual";
+export type ReDealStatus = "new" | "qualified" | "passed" | "under_review" | "dead";
+
+export type ReDeal = {
+  id: string;
+  tenant_id: string;
+  source: ReDealSource;
+  source_url: string | null;
+  source_listing_id: string | null;
+  title: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  units: number | null;
+  year_built: number | null;
+  asking_price: number | null;
+  price_per_unit: number | null;
+  noi_advertised: number | null;
+  cap_rate_advertised: number | null;
+  broker_name: string | null;
+  broker_company: string | null;
+  broker_email: string | null;
+  broker_phone: string | null;
+  raw: unknown;
+  status: ReDealStatus;
+  first_seen_at: string;
+  last_seen_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReUnderwrite = {
+  id: string;
+  tenant_id: string;
+  deal_id: string;
+  model_version: string;
+  inputs: Record<string, unknown>;
+  cap_rate_actual: number | null;
+  noi_estimated: number | null;
+  dscr_at_market: number | null;
+  value_add_upside: number | null;
+  target_irr: number | null;
+  qualifying: boolean;
+  summary: string | null;
+  score: number | null;
+  created_at: string;
+};
+
+export type ReDealCriteriaMarket = {
+  metro: string;
+  states: string[];
+  cities: string[];
+  units_min: number;
+  units_max: number;
+  vintage_min_year: number;
+  asset_classes: string[];
+  max_deal_size_usd: number;
+};
+
+export type ReDealCriteria = {
+  markets: ReDealCriteriaMarket[];
+  target_cap_rate_min: number;
+  max_ltv: number;
+  hold_period_years: number;
+  value_add_appetite: boolean;
+  notes?: string;
+};
+
+export async function getDealCriteria(tenantId: string): Promise<ReDealCriteria | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("re_deal_criteria")
+    .select("criteria").eq("tenant_id", tenantId).maybeSingle();
+  if (error || !data) return null;
+  return data.criteria as unknown as ReDealCriteria;
+}
+
+export async function listDeals(tenantId: string, opts?: {
+  status?: ReDealStatus | "all";
+  limit?: number;
+}): Promise<Array<ReDeal & { latest_underwrite: ReUnderwrite | null }>> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  let q = sb.from("re_deals").select("*").eq("tenant_id", tenantId);
+  if (opts?.status && opts.status !== "all") q = q.eq("status", opts.status);
+  q = q.order("first_seen_at", { ascending: false }).limit(opts?.limit ?? 100);
+  const { data: deals, error } = await q;
+  if (error || !deals) return [];
+
+  // Get latest underwrite per deal
+  const dealIds = (deals as ReDeal[]).map((d) => d.id);
+  if (dealIds.length === 0) return [];
+  const { data: uws } = await sb.from("re_underwrites")
+    .select("*").eq("tenant_id", tenantId).in("deal_id", dealIds)
+    .order("created_at", { ascending: false });
+  const latestByDeal = new Map<string, ReUnderwrite>();
+  for (const uw of (uws ?? []) as ReUnderwrite[]) {
+    if (!latestByDeal.has(uw.deal_id)) latestByDeal.set(uw.deal_id, uw);
+  }
+  return (deals as ReDeal[]).map((d) => ({ ...d, latest_underwrite: latestByDeal.get(d.id) ?? null }));
+}
+
+export async function getDeal(tenantId: string, id: string): Promise<(ReDeal & { underwrites: ReUnderwrite[] }) | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data: deal } = await sb.from("re_deals").select("*").eq("tenant_id", tenantId).eq("id", id).maybeSingle();
+  if (!deal) return null;
+  const { data: uws } = await sb.from("re_underwrites").select("*")
+    .eq("tenant_id", tenantId).eq("deal_id", id).order("created_at", { ascending: false });
+  return { ...(deal as ReDeal), underwrites: (uws ?? []) as ReUnderwrite[] };
+}
+
+export async function upsertDeal(tenantId: string, input: Omit<ReDeal, "id" | "tenant_id" | "price_per_unit" | "created_at" | "updated_at" | "first_seen_at" | "last_seen_at"> & {
+  status?: ReDealStatus;
+}): Promise<ReDeal | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const row = {
+    tenant_id: tenantId,
+    source: input.source,
+    source_url: input.source_url,
+    source_listing_id: input.source_listing_id,
+    title: input.title,
+    address: input.address,
+    city: input.city,
+    state: input.state,
+    zip: input.zip,
+    units: input.units,
+    year_built: input.year_built,
+    asking_price: input.asking_price,
+    noi_advertised: input.noi_advertised,
+    cap_rate_advertised: input.cap_rate_advertised,
+    broker_name: input.broker_name,
+    broker_company: input.broker_company,
+    broker_email: input.broker_email,
+    broker_phone: input.broker_phone,
+    raw: input.raw as never,
+    status: input.status ?? "new",
+    last_seen_at: new Date().toISOString(),
+  };
+  // Upsert by (tenant_id, source, source_listing_id) — manual: select first, insert if missing
+  if (input.source_listing_id) {
+    const { data: existing } = await sb.from("re_deals")
+      .select("id").eq("tenant_id", tenantId)
+      .eq("source", input.source).eq("source_listing_id", input.source_listing_id).maybeSingle();
+    if (existing) {
+      const { data: updated } = await sb.from("re_deals")
+        .update(row as never).eq("id", (existing as { id: string }).id).select("*").single();
+      return (updated as ReDeal) ?? null;
+    }
+  }
+  const { data: inserted, error } = await sb.from("re_deals").insert(row as never).select("*").single();
+  if (error || !inserted) return null;
+  return inserted as ReDeal;
+}
+
+export async function updateDealStatus(tenantId: string, id: string, status: ReDealStatus): Promise<boolean> {
+  if (!hasSupabase()) return false;
+  const sb = createServerClient();
+  const { error } = await sb.from("re_deals").update({ status, updated_at: new Date().toISOString() })
+    .eq("tenant_id", tenantId).eq("id", id);
+  return !error;
+}
+
+export async function createUnderwrite(tenantId: string, input: Omit<ReUnderwrite, "id" | "tenant_id" | "created_at">): Promise<ReUnderwrite | null> {
+  if (!hasSupabase()) return null;
+  const sb = createServerClient();
+  const { data, error } = await sb.from("re_underwrites").insert({
+    tenant_id: tenantId,
+    deal_id: input.deal_id,
+    model_version: input.model_version,
+    inputs: input.inputs as never,
+    cap_rate_actual: input.cap_rate_actual,
+    noi_estimated: input.noi_estimated,
+    dscr_at_market: input.dscr_at_market,
+    value_add_upside: input.value_add_upside,
+    target_irr: input.target_irr,
+    qualifying: input.qualifying,
+    summary: input.summary,
+    score: input.score,
+  }).select("*").single();
+  if (error || !data) return null;
+  return data as ReUnderwrite;
+}
+
+// Per-tenant alert recipients (stored in tenant_integrations.config under
+// kind='resend' since alerts are sent via Resend)
+export async function listAlertRecipients(tenantId: string): Promise<string[]> {
+  if (!hasSupabase()) return [];
+  const sb = createServerClient();
+  const { data } = await sb.from("tenant_integrations")
+    .select("config").eq("tenant_id", tenantId).eq("kind", "resend").maybeSingle();
+  if (!data) return [];
+  const config = (data as { config: Record<string, unknown> }).config ?? {};
+  const recips = config.alert_recipients;
+  return Array.isArray(recips) ? (recips as string[]) : [];
+}
+
 export async function bulkCreateBacklogItems(tenantId: string, items: Array<{
   title: string;
   description?: string;

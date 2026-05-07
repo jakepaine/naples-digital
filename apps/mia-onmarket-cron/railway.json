@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "apps/mia-onmarket-cron/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "pnpm exec tsx src/main.ts",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}

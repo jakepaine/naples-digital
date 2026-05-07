@@ -16,6 +16,8 @@ A connected demo + production system showing what Naples Digital builds for 239 
 | **sponsor-pitch** | https://sponsor-pitch-production.up.railway.app | AI sponsor one-pager builder — pitch any company in 30s |
 | **sponsor-analytics** | https://sponsor-analytics-production.up.railway.app | Per-sponsor private analytics portal at `/s/<magic-link-token>` |
 | **backlog** | https://backlog-production-2a84.up.railway.app | Naples Digital agency backlog — per-tenant tabs, AI Suggest scans repo state. Operator-gated. |
+| **mia** | (Railway service `mia`, port 3013) | MIA-tenant acquisition tools: on-market deal flow, off-market owners, submarkets, coaching pipeline, LP tracker, broker inbox. Operator-gated. |
+| **mia-onmarket-cron** | (worker, no public URL) | LoopNet + Crexi scrape via Apify, auto-underwrite, Resend deal alert emails. Reads MIA's Apify token from Vault. Cron on 6h interval. |
 
 ## Architecture
 

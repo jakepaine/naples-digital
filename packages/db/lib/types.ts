@@ -12,6 +12,66 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" }
   public: {
     Tables: {
+      re_deals: {
+        Row: { address: string | null; asking_price: number | null; broker_company: string | null; broker_email: string | null; broker_name: string | null; broker_phone: string | null; cap_rate_advertised: number | null; city: string | null; created_at: string; first_seen_at: string; id: string; last_seen_at: string; noi_advertised: number | null; price_per_unit: number | null; raw: Json | null; source: string; source_listing_id: string | null; source_url: string | null; state: string | null; status: string; tenant_id: string; title: string | null; units: number | null; updated_at: string; year_built: number | null; zip: string | null }
+        Insert: { address?: string | null; asking_price?: number | null; broker_company?: string | null; broker_email?: string | null; broker_name?: string | null; broker_phone?: string | null; cap_rate_advertised?: number | null; city?: string | null; created_at?: string; first_seen_at?: string; id?: string; last_seen_at?: string; noi_advertised?: number | null; raw?: Json | null; source: string; source_listing_id?: string | null; source_url?: string | null; state?: string | null; status?: string; tenant_id: string; title?: string | null; units?: number | null; updated_at?: string; year_built?: number | null; zip?: string | null }
+        Update: { address?: string | null; asking_price?: number | null; broker_company?: string | null; broker_email?: string | null; broker_name?: string | null; broker_phone?: string | null; cap_rate_advertised?: number | null; city?: string | null; created_at?: string; first_seen_at?: string; id?: string; last_seen_at?: string; noi_advertised?: number | null; raw?: Json | null; source?: string; source_listing_id?: string | null; source_url?: string | null; state?: string | null; status?: string; tenant_id?: string; title?: string | null; units?: number | null; updated_at?: string; year_built?: number | null; zip?: string | null }
+        Relationships: []
+      }
+      re_underwrites: {
+        Row: { cap_rate_actual: number | null; created_at: string; deal_id: string; dscr_at_market: number | null; id: string; inputs: Json; model_version: string; noi_estimated: number | null; qualifying: boolean; score: number | null; summary: string | null; target_irr: number | null; tenant_id: string; value_add_upside: number | null }
+        Insert: { cap_rate_actual?: number | null; created_at?: string; deal_id: string; dscr_at_market?: number | null; id?: string; inputs?: Json; model_version: string; noi_estimated?: number | null; qualifying?: boolean; score?: number | null; summary?: string | null; target_irr?: number | null; tenant_id: string; value_add_upside?: number | null }
+        Update: { cap_rate_actual?: number | null; created_at?: string; deal_id?: string; dscr_at_market?: number | null; id?: string; inputs?: Json; model_version?: string; noi_estimated?: number | null; qualifying?: boolean; score?: number | null; summary?: string | null; target_irr?: number | null; tenant_id?: string; value_add_upside?: number | null }
+        Relationships: []
+      }
+      re_off_market_targets: {
+        Row: { account_number: string; address: string | null; bookmarked: boolean; city: string | null; county: string; created_at: string; id: string; last_sale_date: string | null; last_sale_price: number | null; owned_for_years: number | null; owner_address: string | null; owner_name: string | null; raw: Json | null; state: string | null; tenant_id: string; units: number | null; updated_at: string; year_built: number | null; zip: string | null }
+        Insert: { account_number: string; address?: string | null; bookmarked?: boolean; city?: string | null; county: string; created_at?: string; id?: string; last_sale_date?: string | null; last_sale_price?: number | null; owned_for_years?: number | null; owner_address?: string | null; owner_name?: string | null; raw?: Json | null; state?: string | null; tenant_id: string; units?: number | null; updated_at?: string; year_built?: number | null; zip?: string | null }
+        Update: { account_number?: string; address?: string | null; bookmarked?: boolean; city?: string | null; county?: string; created_at?: string; id?: string; last_sale_date?: string | null; last_sale_price?: number | null; owned_for_years?: number | null; owner_address?: string | null; owner_name?: string | null; raw?: Json | null; state?: string | null; tenant_id?: string; units?: number | null; updated_at?: string; year_built?: number | null; zip?: string | null }
+        Relationships: []
+      }
+      re_skiptraces: {
+        Row: { cost_cents: number | null; created_at: string; emails: string[]; id: string; llc_unwound_to: string | null; phones: string[]; provider: string; raw: Json | null; target_id: string | null; tenant_id: string }
+        Insert: { cost_cents?: number | null; created_at?: string; emails?: string[]; id?: string; llc_unwound_to?: string | null; phones?: string[]; provider: string; raw?: Json | null; target_id?: string | null; tenant_id: string }
+        Update: { cost_cents?: number | null; created_at?: string; emails?: string[]; id?: string; llc_unwound_to?: string | null; phones?: string[]; provider?: string; raw?: Json | null; target_id?: string | null; tenant_id?: string }
+        Relationships: []
+      }
+      re_students: {
+        Row: { created_at: string; email: string | null; enrolled_at: string | null; id: string; name: string; notes: string | null; phone: string | null; status: string; target_market: string | null; tenant_id: string; updated_at: string }
+        Insert: { created_at?: string; email?: string | null; enrolled_at?: string | null; id?: string; name: string; notes?: string | null; phone?: string | null; status?: string; target_market?: string | null; tenant_id: string; updated_at?: string }
+        Update: { created_at?: string; email?: string | null; enrolled_at?: string | null; id?: string; name?: string; notes?: string | null; phone?: string | null; status?: string; target_market?: string | null; tenant_id?: string; updated_at?: string }
+        Relationships: []
+      }
+      re_student_deals: {
+        Row: { address: string | null; asking_price: number | null; created_at: string; id: string; notes: string | null; offer_price: number | null; status: string; student_id: string; tenant_id: string; units: number | null; updated_at: string }
+        Insert: { address?: string | null; asking_price?: number | null; created_at?: string; id?: string; notes?: string | null; offer_price?: number | null; status?: string; student_id: string; tenant_id: string; units?: number | null; updated_at?: string }
+        Update: { address?: string | null; asking_price?: number | null; created_at?: string; id?: string; notes?: string | null; offer_price?: number | null; status?: string; student_id?: string; tenant_id?: string; units?: number | null; updated_at?: string }
+        Relationships: []
+      }
+      re_submarkets: {
+        Row: { avg_cap_rate: number | null; avg_occupancy: number | null; avg_rent_per_unit: number | null; city: string | null; created_at: string; demographics: Json | null; id: string; last_refreshed_at: string | null; name: string; new_supply_units: number | null; recent_sales_count: number | null; state: string | null; tenant_id: string }
+        Insert: { avg_cap_rate?: number | null; avg_occupancy?: number | null; avg_rent_per_unit?: number | null; city?: string | null; created_at?: string; demographics?: Json | null; id?: string; last_refreshed_at?: string | null; name: string; new_supply_units?: number | null; recent_sales_count?: number | null; state?: string | null; tenant_id: string }
+        Update: { avg_cap_rate?: number | null; avg_occupancy?: number | null; avg_rent_per_unit?: number | null; city?: string | null; created_at?: string; demographics?: Json | null; id?: string; last_refreshed_at?: string | null; name?: string; new_supply_units?: number | null; recent_sales_count?: number | null; state?: string | null; tenant_id?: string }
+        Relationships: []
+      }
+      re_investors: {
+        Row: { accredited: boolean | null; created_at: string; email: string | null; entity_name: string | null; id: string; name: string; notes: string | null; phone: string | null; preferred_asset_classes: string[]; preferred_geographies: string[]; target_check_size_max: number | null; target_check_size_min: number | null; tenant_id: string; updated_at: string }
+        Insert: { accredited?: boolean | null; created_at?: string; email?: string | null; entity_name?: string | null; id?: string; name: string; notes?: string | null; phone?: string | null; preferred_asset_classes?: string[]; preferred_geographies?: string[]; target_check_size_max?: number | null; target_check_size_min?: number | null; tenant_id: string; updated_at?: string }
+        Update: { accredited?: boolean | null; created_at?: string; email?: string | null; entity_name?: string | null; id?: string; name?: string; notes?: string | null; phone?: string | null; preferred_asset_classes?: string[]; preferred_geographies?: string[]; target_check_size_max?: number | null; target_check_size_min?: number | null; tenant_id?: string; updated_at?: string }
+        Relationships: []
+      }
+      re_broker_emails: {
+        Row: { body_text: string | null; created_at: string; from_email: string | null; id: string; linked_deal_id: string | null; parsed: Json | null; received_at: string; subject: string | null; tenant_id: string }
+        Insert: { body_text?: string | null; created_at?: string; from_email?: string | null; id?: string; linked_deal_id?: string | null; parsed?: Json | null; received_at?: string; subject?: string | null; tenant_id: string }
+        Update: { body_text?: string | null; created_at?: string; from_email?: string | null; id?: string; linked_deal_id?: string | null; parsed?: Json | null; received_at?: string; subject?: string | null; tenant_id?: string }
+        Relationships: []
+      }
+      re_deal_criteria: {
+        Row: { criteria: Json; tenant_id: string; updated_at: string }
+        Insert: { criteria?: Json; tenant_id: string; updated_at?: string }
+        Update: { criteria?: Json; tenant_id?: string; updated_at?: string }
+        Relationships: []
+      }
       backlog_items: {
         Row: { completed_at: string | null; created_at: string; description: string | null; due_at: string | null; id: string; priority: string; sort_order: number; source: string; status: string; tags: string[]; tenant_id: string; title: string; updated_at: string }
         Insert: { completed_at?: string | null; created_at?: string; description?: string | null; due_at?: string | null; id?: string; priority?: string; sort_order?: number; source?: string; status?: string; tags?: string[]; tenant_id: string; title: string; updated_at?: string }

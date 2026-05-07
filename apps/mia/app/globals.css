@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background: #0A0A0A;
+  color: #F5F5F5;
+  font-feature-settings: "ss01", "ss02";
+}
+
+/* MIA accent — violet from the brand seed */
+::selection {
+  background: rgba(138, 107, 184, 0.35);
+  color: #F5F5F5;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0A0A0A; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #8A6BB8; }

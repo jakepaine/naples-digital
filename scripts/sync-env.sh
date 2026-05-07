@@ -33,6 +33,7 @@ CONTENT=https://content-pipeline-production-21b7.up.railway.app
 SPONSOR_PITCH="${NEXT_PUBLIC_SPONSOR_PITCH_URL:-https://sponsor-pitch-production.up.railway.app}"
 SPONSOR_ANALYTICS="${NEXT_PUBLIC_SPONSOR_ANALYTICS_URL:-https://sponsor-analytics-production.up.railway.app}"
 BACKLOG="${NEXT_PUBLIC_BACKLOG_URL:-https://backlog-production-2a84.up.railway.app}"
+MIA_URL="${NEXT_PUBLIC_MIA_URL:-https://mia-production-6900.up.railway.app}"
 
 ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
 SB_URL="${SUPABASE_URL:-}"
@@ -57,6 +58,7 @@ set_common() {
     --set "NEXT_PUBLIC_SPONSOR_PITCH_URL=$SPONSOR_PITCH"
     --set "NEXT_PUBLIC_SPONSOR_ANALYTICS_URL=$SPONSOR_ANALYTICS"
     --set "NEXT_PUBLIC_BACKLOG_URL=$BACKLOG"
+    --set "NEXT_PUBLIC_MIA_URL=$MIA_URL"
   )
   if [ -n "$SB_URL" ];     then args+=( --set "SUPABASE_URL=$SB_URL" ); fi
   if [ -n "$SB_ANON" ];    then args+=( --set "SUPABASE_ANON_KEY=$SB_ANON" ); fi
@@ -96,5 +98,9 @@ set_common      sponsor-analytics   apps/sponsor-analytics/Dockerfile
 # for the Suggest endpoint. ADMIN_PASSWORD is set per service via the Railway
 # dashboard or `railway variable set --service backlog "ADMIN_PASSWORD=..."`.
 set_ai_service  backlog             apps/backlog/Dockerfile
+
+# Phase 10 — MIA acquisition tools (real estate / multifamily)
+set_ai_service  mia                  apps/mia/Dockerfile
+set_ai_service  mia-onmarket-cron    apps/mia-onmarket-cron/Dockerfile
 
 echo "✓ Env vars synced across all services."
