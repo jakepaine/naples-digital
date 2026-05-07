@@ -39,6 +39,7 @@ ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
 SB_URL="${SUPABASE_URL:-}"
 SB_ANON="${SUPABASE_ANON_KEY:-}"
 SB_SERVICE="${SUPABASE_SERVICE_ROLE_KEY:-}"
+RESEND_KEY="${RESEND_API_KEY:-}"
 
 set_common() {
   local svc="$1"
@@ -63,6 +64,7 @@ set_common() {
   if [ -n "$SB_URL" ];     then args+=( --set "SUPABASE_URL=$SB_URL" ); fi
   if [ -n "$SB_ANON" ];    then args+=( --set "SUPABASE_ANON_KEY=$SB_ANON" ); fi
   if [ -n "$SB_SERVICE" ]; then args+=( --set "SUPABASE_SERVICE_ROLE_KEY=$SB_SERVICE" ); fi
+  if [ -n "$RESEND_KEY" ]; then args+=( --set "RESEND_API_KEY=$RESEND_KEY" ); fi
   args+=( "$@" )
   railway variables "${args[@]}" > /dev/null
 }

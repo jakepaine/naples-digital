@@ -82,44 +82,57 @@ export async function runActor(
   return Array.isArray(items) ? items : [];
 }
 
-// LoopNet actor schema varies by community actor. This shape assumes the
-// epctex/loopnet-scraper actor input format (popular community option). Adjust
-// after first live run shows what fields actually come back.
+// Actor IDs discovered via Apify Store search 2026-05-07. Most-used community
+// actors at the time. If schemas drift we re-tune normalize* functions; the
+// actor IDs here are the moving parts.
+//   - memo23/loopnet-scraper-ppe — LoopNet, 6.8k+ runs, ~$1.50/run pricing
+//   - powerai/crexi-listing-scraper — Crexi, 540+ runs
+const LOOPNET_ACTOR = "memo23/loopnet-scraper-ppe";
+const CREXI_ACTOR = "powerai/crexi-listing-scraper";
+
 export async function scrapeLoopnet(token: string, criteria: { metros: string[]; states: string[] }): Promise<RawListing[]> {
-  const items = await runActor(token, {
-    actorId: "epctex/loopnet-scraper",
-    input: {
-      // Keyword-based search; most community actors accept search URLs or terms.
-      // For each market we'll need to construct a LoopNet search URL with multifamily filters.
-      // Placeholder input — needs tuning after first live test.
-      startUrls: criteria.metros.flatMap((metro) => [
-        { url: `https://www.loopnet.com/search/multifamily/${slugify(metro)}/for-sale/` },
-      ]),
-      maxItems: 200,
-    },
-    timeoutSeconds: 600,
-  });
-  return items.map((raw) => normalizeLoopnetItem(raw));
+  // memo23 actor accepts startUrls or keyword search. We feed it constructed
+  // LoopNet search URLs for multifamily for-sale in each metro. Actor returns
+  // a flat list of listings.
+  const startUrls = criteria.metros.map((metro) => ({
+    url: `https://www.loopnet.com/search/multifamily/${slugify(metro)}/for-sale/`,
+  }));
+  try {
+    const items = await runActor(token, {
+      actorId: LOOPNET_ACTOR,
+      input: {
+        startUrls,
+        maxItems: 200,
+        proxyConfiguration: { useApifyProxy: true },
+      },
+      timeoutSeconds: 600,
+    });
+    return items.map((raw) => normalizeLoopnetItem(raw));
+  } catch (e) {
+    console.warn("[apify] loopnet actor failed — skipping:", e instanceof Error ? e.message : e);
+    return [];
+  }
 }
 
 export async function scrapeCrexi(token: string, criteria: { metros: string[]; states: string[] }): Promise<RawListing[]> {
-  // Crexi has fewer maintained scrapers on Apify. Many users build their own
-  // actors. For v1 we'll attempt a stock actor and fall back to empty array
-  // if it doesn't exist. Better Crexi coverage is a follow-up.
+  // powerai/crexi-listing-scraper accepts search URLs or terms.
   try {
     const items = await runActor(token, {
-      actorId: "lukaskrivka/crexi-scraper",
+      actorId: CREXI_ACTOR,
       input: {
-        searchUrls: criteria.metros.flatMap((metro) =>
-          criteria.states.map((state) => `https://www.crexi.com/properties?types[]=Multifamily&locations[]=${encodeURIComponent(`${metro}, ${state}`)}`)
+        startUrls: criteria.metros.flatMap((metro) =>
+          criteria.states.map((state) => ({
+            url: `https://www.crexi.com/properties?types[]=Multifamily&locations[]=${encodeURIComponent(`${metro}, ${state}`)}`,
+          }))
         ),
         maxItems: 200,
+        proxyConfiguration: { useApifyProxy: true },
       },
       timeoutSeconds: 600,
     });
     return items.map((raw) => normalizeCrexiItem(raw));
   } catch (e) {
-    console.warn("[apify] crexi actor unavailable or failed — skipping:", e instanceof Error ? e.message : e);
+    console.warn("[apify] crexi actor failed — skipping:", e instanceof Error ? e.message : e);
     return [];
   }
 }
