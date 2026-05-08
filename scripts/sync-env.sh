@@ -33,6 +33,7 @@ CONTENT=https://content-pipeline-production-21b7.up.railway.app
 SPONSOR_PITCH="${NEXT_PUBLIC_SPONSOR_PITCH_URL:-https://sponsor-pitch-production.up.railway.app}"
 SPONSOR_ANALYTICS="${NEXT_PUBLIC_SPONSOR_ANALYTICS_URL:-https://sponsor-analytics-production.up.railway.app}"
 BACKLOG="${NEXT_PUBLIC_BACKLOG_URL:-https://backlog-production-2a84.up.railway.app}"
+ADMIN_CONSOLE="${NEXT_PUBLIC_ADMIN_CONSOLE_URL:-https://admin-console-production-12e2.up.railway.app}"
 MIA_URL="${NEXT_PUBLIC_MIA_URL:-https://mia-production-6900.up.railway.app}"
 
 ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
@@ -59,6 +60,7 @@ set_common() {
     --set "NEXT_PUBLIC_SPONSOR_PITCH_URL=$SPONSOR_PITCH"
     --set "NEXT_PUBLIC_SPONSOR_ANALYTICS_URL=$SPONSOR_ANALYTICS"
     --set "NEXT_PUBLIC_BACKLOG_URL=$BACKLOG"
+    --set "NEXT_PUBLIC_ADMIN_CONSOLE_URL=$ADMIN_CONSOLE"
     --set "NEXT_PUBLIC_MIA_URL=$MIA_URL"
   )
   if [ -n "$SB_URL" ];     then args+=( --set "SUPABASE_URL=$SB_URL" ); fi
