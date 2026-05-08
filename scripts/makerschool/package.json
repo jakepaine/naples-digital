@@ -1,0 +1,19 @@
+{
+  "name": "@naples/makerschool-study",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Study scripts + reference data for the MakerSchool course (Naples Digital module gap research). Not a deployed service.",
+  "type": "module",
+  "scripts": {
+    "process-videos": "tsx process-videos.ts",
+    "process-videos:doppler": "doppler run --project naples-digital --config prd -- tsx process-videos.ts"
+  },
+  "dependencies": {
+    "@google/genai": "^0.7.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
