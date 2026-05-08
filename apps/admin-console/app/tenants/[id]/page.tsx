@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTenantById, listTenantIntegrations } from "@naples/db";
+import {
+  getTenantById,
+  listTenantIntegrations,
+  MODULES,
+  TIERS,
+  modulesForTier,
+  type ModuleKey,
+  type Tier,
+} from "@naples/db";
 import { Card, Badge } from "@naples/ui";
-import { ChevronRight, Plug, Users, Layers } from "lucide-react";
+import { ChevronRight, Plug, Users, Layers, LayoutGrid, Check, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +32,54 @@ export default async function TenantDetail({ params }: { params: { id: string } 
       <div className="mt-3 h-px w-16 bg-gold" />
       <div className="mt-4 flex items-center gap-3">
         <div className="font-mono text-xs text-muted">{t.slug}</div>
-        <Badge tone={t.plan === "agency" ? "gold" : t.plan === "pro" ? "violet" : "muted"}>{t.plan}</Badge>
+        <TierBadge tier={(t.tier ?? "starter") as Tier} />
         <Badge tone={t.status === "active" ? "emerald" : "amber"}>{t.status}</Badge>
       </div>
+
+      <section className="mt-8">
+        <Card>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-gold">
+              <LayoutGrid className="h-5 w-5" />
+              <span className="font-heading text-xl tracking-broadcast text-cream">Modules</span>
+            </div>
+            <Link href="/modules" className="text-xs text-muted hover:text-cream">View matrix</Link>
+          </div>
+          <p className="mt-2 text-xs text-cream/60">
+            {(t.tier ?? "starter") === "enterprise"
+              ? "Custom-priced enterprise tenant — modules are bespoke."
+              : `Tier price: $${TIERS[(t.tier ?? "starter") as Tier].monthlyPrice}/mo · ${t.enabled_modules?.length ?? 0} modules enabled`}
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+            {(Object.values(MODULES)).map((m) => {
+              const enabled = (t.enabled_modules ?? []).includes(m.key);
+              const fromTier = modulesForTier((t.tier ?? "starter") as Tier).includes(m.key as ModuleKey);
+              return (
+                <div
+                  key={m.key}
+                  className="flex items-center justify-between gap-3 rounded border border-card-border px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm text-cream truncate">{m.name}</div>
+                    <div className="font-mono text-[10px] text-muted truncate">{m.app}</div>
+                  </div>
+                  {enabled && fromTier && (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-emerald">
+                      <Check className="h-3 w-3" /> Tier
+                    </span>
+                  )}
+                  {enabled && !fromTier && (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-violet">
+                      <Plus className="h-3 w-3" /> Add-on
+                    </span>
+                  )}
+                  {!enabled && <span className="text-[10px] uppercase tracking-wider text-muted">—</span>}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </section>
 
       <section className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Link href={`/tenants/${t.id}/integrations`} className="group">
@@ -68,4 +121,13 @@ export default async function TenantDetail({ params }: { params: { id: string } 
       </section>
     </main>
   );
+}
+
+function TierBadge({ tier }: { tier: Tier }) {
+  const def = TIERS[tier];
+  if (tier === "design_partner") return <Badge tone="emerald">{def.name}</Badge>;
+  if (tier === "premium") return <Badge tone="gold">{def.name}</Badge>;
+  if (tier === "growth") return <Badge tone="violet">{def.name}</Badge>;
+  if (tier === "enterprise") return <Badge tone="rose">{def.name}</Badge>;
+  return <Badge tone="muted">{def.name}</Badge>;
 }

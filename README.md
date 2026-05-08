@@ -1,6 +1,8 @@
-# Naples Digital × 239 Live System
+# Naples Digital Platform
 
-A connected demo + production system showing what Naples Digital builds for 239 Live Studios. **Nine** Next.js 14 apps in a pnpm + Turborepo monorepo, each deployed as its own Railway service, all backed by a real Supabase Postgres database, all sharing the same brand. Four AI features ship as real products powered by Claude Sonnet 4.6 (with deterministic mock fallbacks if no API key).
+Vertical SaaS for service businesses. **16 services** in a pnpm + Turborepo monorepo (14 Next.js 14 apps + 2 Node workers), each deployed as its own Railway service, all backed by a single Supabase Postgres database. Four customer-facing AI features powered by Claude Sonnet 4.6 (deterministic mock fallbacks when no API key is set). Multi-tenant by data — five tenants live today (`239live`, `naplesdigital`, `mia`, `lifewise`, `jakepaine`).
+
+239 Live (Kevin) is the flagship design-partner tenant. Naples Digital itself is tenant #2, dogfooding the platform. Future tenants pick a tier and pay a monthly subscription.
 
 ## Live URLs
 
@@ -18,6 +20,10 @@ A connected demo + production system showing what Naples Digital builds for 239 
 | **backlog** | https://backlog-production-2a84.up.railway.app | Naples Digital agency backlog — per-tenant tabs, AI Suggest scans repo state. Operator-gated. |
 | **mia** | (Railway service `mia`, port 3013) | MIA-tenant acquisition tools: on-market deal flow, off-market owners, submarkets, coaching pipeline, LP tracker, broker inbox. Operator-gated. |
 | **mia-onmarket-cron** | (worker, no public URL) | LoopNet + Crexi scrape via Apify, auto-underwrite, Resend deal alert emails. Reads MIA's Apify token from Vault. Cron on 6h interval. |
+| **admin-console** | (Railway service `admin-console`, port 3010) | Cross-tenant operator console. Operator-gated. |
+| **client-portal** | (Railway service `client-portal`, port 3009) | Per-tenant client-facing portal. |
+| **outreach-dispatcher** | (Railway service `outreach-dispatcher`, port 3011) | Outreach send queue + delivery worker UI. |
+| **render-worker** | (worker, no public URL) | Episode → short-form clip rendering: ffmpeg cut + 9:16 crop + karaoke captions in tenant brand color, fed by AssemblyAI word timestamps + Claude clip picks. |
 
 ## Architecture
 
@@ -25,30 +31,40 @@ A connected demo + production system showing what Naples Digital builds for 239 
 naples-digital/
 ├── apps/
 │   ├── 239live-site/        Public studio site
+│   ├── admin-console/       Cross-tenant operator console
+│   ├── agency-site/         Naples Digital marketing site
+│   ├── backlog/             Per-tenant agency backlog tracker (replaces ClickUp)
 │   ├── booking-portal/      Multi-step booking wizard
+│   ├── client-portal/       Per-tenant client-facing portal
+│   ├── content-pipeline/    Episode pipeline + intake form + AI clip generator
+│   ├── crm-pipeline/        Kanban with @dnd-kit + AI lead intelligence
 │   ├── dashboard/           Kevin's ops hub (sidebar + 6 sections)
-│   ├── outreach-demo/       AI email generator (Anthropic + mock fallback)
-│   ├── crm-pipeline/        Kanban with @dnd-kit
-│   ├── content-pipeline/    Episode pipeline + intake form
-│   └── agency-site/         Naples Digital marketing site
+│   ├── mia/                 MIA-tenant acquisition tools
+│   ├── mia-onmarket-cron/   Worker — LoopNet/Crexi scrape via Apify, auto-underwrite, Resend alerts
+│   ├── outreach-demo/       AI 3-email cold sequence generator
+│   ├── outreach-dispatcher/ Outreach send queue + delivery worker UI
+│   ├── render-worker/       Worker — episode → short-form clips (ffmpeg + AssemblyAI + Claude)
+│   ├── sponsor-analytics/   Per-sponsor analytics portal (magic-link)
+│   └── sponsor-pitch/       AI sponsor one-pager builder
 ├── packages/
 │   ├── ui/                  Brand tokens, Tailwind preset, shared components (Nav, Card, Button, Badge)
+│   ├── db/                  Supabase client + tenant/secret helpers (`getTenantSecret`, `set_tenant_secret`)
 │   └── mock-data/           Typed mock data (bookings, leads, MRR, episodes, social, projections, roadmap)
 ├── scripts/
-│   ├── scaffold-apps.sh     Idempotent Next.js scaffold across all 7 apps
-│   └── sync-env.sh          Sync NEXT_PUBLIC_*_URL across all 7 Railway services
+│   └── sync-env.sh          Sync NEXT_PUBLIC_*_URL + secrets across all Railway services
+├── supabase/migrations/     Schema migrations (tenants, integrations, vault, MIA re_* tables, etc.)
 ├── pnpm-workspace.yaml
 ├── turbo.json
 └── package.json
 ```
 
-Each app uses Next.js 14 App Router, Tailwind CSS, the `@naples/ui` shared component library, and the `@naples/mock-data` shared data layer. Charts use Recharts. Drag-and-drop uses `@dnd-kit/core`.
+Each Next.js app uses the App Router, Tailwind CSS, the `@naples/ui` shared component library, and `@naples/db` for Supabase access. Charts use Recharts. Drag-and-drop uses `@dnd-kit/core`. Workers (`mia-onmarket-cron`, `render-worker`) are plain Node + `tsx`, no Next.js.
 
 ## Local development
 
 ```bash
 pnpm install
-pnpm dev          # runs all 7 apps in parallel on ports 3000–3006
+pnpm dev          # runs every app in parallel via Turborepo (ports 3000–3013)
 ```
 
 Or run a single app:
@@ -65,20 +81,32 @@ pnpm --filter @naples/dashboard dev
 | outreach-demo | 3004 |
 | crm-pipeline | 3005 |
 | content-pipeline | 3006 |
+| sponsor-pitch | 3007 |
+| sponsor-analytics | 3008 |
+| client-portal | 3009 |
+| admin-console | 3010 |
+| outreach-dispatcher | 3011 |
+| backlog | 3012 |
+| mia | 3013 |
+| mia-onmarket-cron | worker |
+| render-worker | worker |
 
 ## Environment variables
 
-**Source of truth: Doppler** (project `naples-digital`, config `prd`). Local dev uses `doppler run --` to inject secrets; Railway services receive them via `bash scripts/sync-env.sh` (run inside `doppler run`) or the Doppler→Railway dashboard integration.
+**Two layers, by scope:**
+
+1. **Platform-wide secrets** — Doppler (project `naples-digital`, config `prd`). `ANTHROPIC_API_KEY`, Supabase keys, Resend, cross-app `NEXT_PUBLIC_*_URL`s, etc. Doppler→Railway dashboard integration syncs them to every service.
+2. **Per-tenant per-vendor secrets** — Supabase Vault, accessed via `tenant_integrations.secret_ref` + the `set_tenant_secret(tenant_id, kind, secret, config)` / `get_tenant_secret(tenant_id, kind)` RPCs. This is where MIA's Apify token, a tenant's Klaviyo key, etc. live. Helpers in `packages/db/lib/tenant.ts`. Supported `kind`s: `apify`, `batchskiptracing`, `postmark` (extend the `TenantIntegrationKind` union to add more).
 
 ```bash
-# Run any command with prd secrets injected
+# Run any command locally with prd secrets injected
 doppler run -- pnpm --filter @naples/dashboard dev
 
-# Push secrets to all 10 Railway services
+# Push platform-wide secrets to all Railway services (only needed when you add a new service or rotate a NEXT_PUBLIC_*_URL)
 doppler run -- bash scripts/sync-env.sh
 ```
 
-`.env.local` exists only as a legacy fallback for the sync script. New secrets go in Doppler, never `.env.local`. `.env.example` documents the variable names for reference.
+`.env.local` exists as a fallback for the sync script when not running under `doppler run`; new platform secrets go in Doppler. `.env.example` documents the variable names for reference.
 
 AI features (`outreach-demo`, `crm-pipeline`, `content-pipeline`, `sponsor-pitch`, `backlog`) read `ANTHROPIC_API_KEY`; if unset they fall back to deterministic mock generators so screens never break.
 
@@ -113,9 +141,9 @@ To redeploy a single app:
 railway up --service <service-name> --ci --detach
 ```
 
-To re-sync env vars across all 7 services after a domain change:
+To re-sync env vars across all Railway services after a domain change:
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... bash scripts/sync-env.sh
+doppler run -- bash scripts/sync-env.sh
 ```
 
 ## Connecting to real systems
@@ -140,49 +168,39 @@ When Kevin moves off Supabase-as-CRM onto GHL:
 - Add `GHL_API_KEY` and `GHL_LOCATION_ID` to each app's Railway env vars
 - The kanban already PATCHes lead stage on drag — pointing it at GHL is a swap of the `updateLeadStage` implementation, not the UI
 
-## Cost breakdown (what Kevin pays)
+## Pricing & modules
 
-| Item | Monthly |
-|---|---|
-| Railway hosting (7 services) | ~$50–80 |
-| GoHighLevel CRM | $97–297 |
-| Anthropic API (outreach + content) | $50–150 |
-| Buffer / Hootsuite (content distribution) | $30–100 |
-| Stripe processing | per-transaction, ~2.9% |
-| Domain + DNS + transactional email | $20–40 |
-| **Platform stack pass-through** | **~$460–690/mo (at cost, no markup)** |
-| Naples Digital retainer | $3,000/mo |
-| Equipment rental (optional) | $1,500/mo |
+Naples Digital is a **subscription SaaS**, not project work. Each tenant picks a tier (or is custom-priced as a Design Partner / Enterprise account). Tiers bundle a default set of modules; add-ons enable individual modules above tier. Source of truth for the module + tier registry: `packages/db/lib/modules.ts`. The admin-console `/modules` route renders the live tenant × module matrix.
 
-## Engagement terms
+| Tier | Setup | Monthly | Modules included |
+|---|---|---|---|
+| **Starter** | $1,500 | $497 | CRM + Booking + Backlog |
+| **Growth** | $2,500 | $997 | + Outreach + Content + Sponsor Pitch |
+| **Premium** | $5,000 | $1,997 | + Dashboard + Sponsor Analytics + Client Portal |
+| **Design Partner** | $5,000 | $750 (12-mo lock) | Premium feature set, half price, 12-month commitment in exchange for case study + roadmap input. First three paying tenants only. |
+| **Enterprise** | custom | custom | Bespoke vertical-specific stack (e.g. MIA's real-estate acquisitions tools). |
 
-| | Option A (Build Heavy) | Option B (Commission Heavy) |
-|---|---|---|
-| Setup | $25,000 | $15,000 |
-| Monthly retainer | $3,000 | $3,000 |
-| Commission (net new sponsor + client MRR) | 10% | 20% |
+Module catalog (current): Operations Dashboard, Booking Portal, CRM Pipeline, Cold Outreach, Content Pipeline, Sponsor Pitch Builder, Sponsor Analytics, Backlog Tracker, Client Portal, Real Estate Acquisitions (vertical). Each maps to one or more apps in this monorepo.
 
-## Ownership
+### Lock-in and value
 
-| What | Who owns it |
-|---|---|
-| Code in this repo | 239 Live (after final invoice paid) |
-| Railway services | 239 Live (paid by 239 Live) |
-| GoHighLevel account | 239 Live |
-| Studio website + brand | 239 Live |
-| Anthropic API key | 239 Live (Naples Digital sets it up) |
-| The "Naples Digital" mark | Naples Digital |
+The platform is the operating system tenants log into daily — sponsor lists, lead history, content libraries, and integration credentials live in Naples Digital's Supabase. Migration cost compounds the longer a tenant uses the platform. Each new module shipped to the platform automatically becomes available to every tenant on a tier that includes it.
 
-Naples Digital builds the system and operates it during the engagement. At end of engagement, every system, every credential, every workflow handed over to 239 Live or its operator. No vendor lock-in.
+### Usage-based costs
 
-## How commissions are tracked
+Anthropic, AssemblyAI, Apify, and other usage-based vendors are passed through at cost or capped per tier. Platform tiers above do not include unbounded API usage.
 
-The dashboard's Revenue & Commissions page is a single source of truth. New leads that close (move to "Client Won" in the CRM) automatically appear in the commission ledger at 10% (Option A) or 20% (Option B) of monthly value. Naples Digital invoices monthly against this ledger.
+## Roadmap snapshot
 
-In production this would be wired to GoHighLevel webhooks — the moment a lead's stage changes to "Client Won", the dashboard updates and the commission line item is appended.
+- Stripe-backed subscription billing (currently invoice-based)
+- Self-serve tenant onboarding wizard
+- Public agency-site case-study page using 239 Live data
+- Content syndication module (one post → IG / FB / Twitter / LinkedIn / Medium)
+- Email triage / categorization module
+- Naples Digital itself fully dogfooding every Premium-tier module
 
 ## Built by
 
-Jake Paine and Noah at Naples Digital · Built April 2026 · Naples, FL.
+Jake Paine and Noah at Naples Digital · Naples, FL.
 
-🤖 This system was built with [Claude Code](https://claude.com/claude-code).
+🤖 Built with [Claude Code](https://claude.com/claude-code).

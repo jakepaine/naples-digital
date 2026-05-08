@@ -14,6 +14,9 @@ export type Tenant = {
   name: string;
   brand: TenantBrand;
   plan: "starter" | "pro" | "agency";
+  tier: "starter" | "growth" | "premium" | "design_partner" | "enterprise";
+  enabled_modules: string[];
+  addons: string[];
   status: "active" | "paused" | "churned";
   created_at: string;
   updated_at: string;
@@ -32,6 +35,9 @@ const FALLBACK_TENANT: Tenant = {
     caption_style: "broadcast",
   },
   plan: "agency",
+  tier: "design_partner",
+  enabled_modules: ["dashboard","booking","crm","outreach","content","sponsor_pitch","sponsor_analytics","backlog","client_portal"],
+  addons: [],
   status: "active",
   created_at: new Date(0).toISOString(),
   updated_at: new Date(0).toISOString(),
