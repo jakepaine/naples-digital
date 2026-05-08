@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter } from "next/font/google";
+import { Inter_Tight, Inter } from "next/font/google";
 import { BrandFrame, NaplesNav } from "@naples/ui";
 import "./globals.css";
 
-const heading = Bebas_Neue({
+const heading = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-heading",
-  weight: ["400"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -18,8 +18,8 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Naples Digital — Vertical SaaS for Service Businesses",
-  description: "The operating system for service businesses. Modules for sales, content, and ops, on a single multi-tenant platform.",
+  title: "Naples Digital — Software infrastructure for service businesses",
+  description: "Sales, content, and operations on a single platform. Bring your service business online with one integration.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

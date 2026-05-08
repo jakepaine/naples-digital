@@ -2,19 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 html,
 body {
   background: #FFFFFF;
-  color: #0A0A0A;
-  font-feature-settings: "ss01", "ss02";
+  color: #425466;
+  font-feature-settings: "ss01", "cv11";
+  font-variant-ligatures: contextual;
 }
 
 ::selection {
-  background: rgba(184, 137, 62, 0.25);
-  color: #0A0A0A;
+  background: rgba(184, 137, 62, 0.18);
+  color: #0A1A2F;
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #FAFAF7; }
-::-webkit-scrollbar-thumb { background: #E5E2D8; border-radius: 0; }
+::-webkit-scrollbar-track { background: #F6F9FC; }
+::-webkit-scrollbar-thumb { background: #E3E8EE; border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: #B8893E; }
+
+/* Stripe-style hero gradient canvas */
+.stripe-gradient-canvas {
+  --gradient-color-1: #FFD27D;
+  --gradient-color-2: #B8893E;
+  --gradient-color-3: #7A4E1F;
+  --gradient-color-4: #FFE9C7;
+  width: 100%;
+  height: 100%;
+  display: block;
+  --gradient-speed: 0.000005;
+}
+
+/* Ink-section reset for nested headings */
+.ink-section {
+  background: #0A1A2F;
+  color: #FFFFFF;
+}
+.ink-section h1, .ink-section h2, .ink-section h3, .ink-section h4 { color: #FFFFFF; }
+.ink-section p { color: rgba(255, 255, 255, 0.72); }
+
+/* Stripe-style fade transition on scroll */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }

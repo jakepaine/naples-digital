@@ -13,7 +13,9 @@
     "./BrandFrame": "./components/BrandFrame.tsx",
     "./Card": "./components/Card.tsx",
     "./Button": "./components/Button.tsx",
-    "./Badge": "./components/Badge.tsx"
+    "./Badge": "./components/Badge.tsx",
+    "./StripeGradient": "./components/StripeGradient.tsx",
+    "./StripeFooter": "./components/StripeFooter.tsx"
   },
   "dependencies": {
     "@naples/mock-data": "workspace:*",
