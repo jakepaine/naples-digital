@@ -12,6 +12,7 @@ import {
   Code2,
   CheckCircle2,
 } from "lucide-react";
+import { PricingSection } from "@/components/PricingSection";
 
 export default function HomePage() {
   return (
@@ -231,53 +232,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Dark CTA section */}
-      <section className="ink-section">
-        <div className="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h2 className="font-heading text-4xl font-semibold leading-[1.08] tracking-tightest lg:text-5xl">
-                Start with one module.<br />Scale to the whole platform.
-              </h2>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed">
-                Three public tiers. Two custom tiers for design partners and enterprise. Pick what fits, turn on what you need, run your business from one place.
-              </p>
-            </div>
-            <div className="space-y-4">
-              {Object.entries(TIERS)
-                .filter(([k]) => ["starter", "growth", "premium"].includes(k))
-                .map(([key, t]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between rounded-stripe border border-white/10 bg-white/[0.03] px-6 py-5 transition-colors hover:border-gold/40"
-                  >
-                    <div>
-                      <div className="font-heading text-lg font-semibold text-white">{t.name}</div>
-                      <div className="mt-1 text-sm text-white/60">
-                        {t.modules.length} modules included
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-heading text-2xl font-semibold text-white">
-                        ${t.monthlyPrice.toLocaleString()}
-                        <span className="text-sm font-normal text-white/60">/mo</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              <div className="pt-2">
-                <Link
-                  href="/pricing"
-                  className="group inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-cream transition-all hover:bg-grad-cream"
-                >
-                  See full pricing
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Pricing showcase */}
+      <PricingSection />
 
       {/* Final CTA */}
       <section className="mx-auto max-w-4xl px-6 py-24 text-center lg:py-32">
