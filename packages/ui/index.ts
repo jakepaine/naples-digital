@@ -1,6 +1,7 @@
 export * from "./tokens";
 export { Nav } from "./components/Nav";
 export { AdminNav } from "./components/AdminNav";
+export { NaplesNav } from "./components/NaplesNav";
 export { BrandFrame } from "./components/BrandFrame";
 export { Card } from "./components/Card";
 export { Button } from "./components/Button";

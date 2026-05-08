@@ -7,6 +7,7 @@
   "exports": {
     ".": "./index.ts",
     "./tailwind-preset": "./tailwind-preset.ts",
+    "./tailwind-preset-naples": "./tailwind-preset-naples.ts",
     "./tokens": "./tokens.ts",
     "./Nav": "./components/Nav.tsx",
     "./BrandFrame": "./components/BrandFrame.tsx",

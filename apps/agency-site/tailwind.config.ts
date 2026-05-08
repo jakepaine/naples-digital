@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import preset from "@naples/ui/tailwind-preset";
+import preset from "@naples/ui/tailwind-preset-naples";
 
 const config: Config = {
   presets: [preset as Config],

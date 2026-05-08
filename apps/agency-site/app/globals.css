@@ -4,18 +4,17 @@
 
 html,
 body {
-  background: #0A0A0A;
-  color: #F5F5F5;
+  background: #FFFFFF;
+  color: #0A0A0A;
   font-feature-settings: "ss01", "ss02";
 }
 
 ::selection {
-  background: rgba(232, 25, 44, 0.35);
-  color: #F5F5F5;
+  background: rgba(184, 137, 62, 0.25);
+  color: #0A0A0A;
 }
 
-/* Live red scrollbar accent */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #0A0A0A; }
-::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #E8192C; }
+::-webkit-scrollbar-track { background: #FAFAF7; }
+::-webkit-scrollbar-thumb { background: #E5E2D8; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #B8893E; }
