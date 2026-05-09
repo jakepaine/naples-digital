@@ -917,6 +917,126 @@ export type Database = {
           },
         ]
       }
+      lead_email_sends: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          from_stage: string | null
+          id: string
+          lead_id: string | null
+          resend_message_id: string | null
+          status: string
+          subject: string
+          template_id: string | null
+          tenant_id: string
+          to_email: string
+          to_stage: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          from_stage?: string | null
+          id?: string
+          lead_id?: string | null
+          resend_message_id?: string | null
+          status: string
+          subject: string
+          template_id?: string | null
+          tenant_id: string
+          to_email: string
+          to_stage: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          from_stage?: string | null
+          id?: string
+          lead_id?: string | null
+          resend_message_id?: string | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+          tenant_id?: string
+          to_email?: string
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_email_sends_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_email_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "lead_email_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_email_templates: {
+        Row: {
+          body_template: string
+          created_at: string
+          enabled: boolean
+          fire_count: number
+          from_stage: string | null
+          id: string
+          last_fired_at: string | null
+          name: string
+          subject: string
+          tenant_id: string
+          to_stage: string
+          updated_at: string
+        }
+        Insert: {
+          body_template: string
+          created_at?: string
+          enabled?: boolean
+          fire_count?: number
+          from_stage?: string | null
+          id?: string
+          last_fired_at?: string | null
+          name: string
+          subject: string
+          tenant_id: string
+          to_stage: string
+          updated_at?: string
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          enabled?: boolean
+          fire_count?: number
+          from_stage?: string | null
+          id?: string
+          last_fired_at?: string | null
+          name?: string
+          subject?: string
+          tenant_id?: string
+          to_stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_email_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_emails: {
         Row: {
           created_at: string

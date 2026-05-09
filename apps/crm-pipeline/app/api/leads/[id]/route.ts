@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { updateLeadStage } from "@naples/db";
-import { getRequestTenantId } from "@naples/db/next";
+import { updateLeadStage, getLeadById } from "@naples/db";
+import { getRequestTenant } from "@naples/db/next";
 import type { LeadStage } from "@naples/mock-data";
+import { sendStageChangeEmails } from "@/lib/send-stage-email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,7 +23,33 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "Invalid stage" }, { status: 400 });
   }
 
-  const tid = await getRequestTenantId(req);
-  const ok = await updateLeadStage(tid, params.id, body.stage as LeadStage, body.days_in_stage ?? 0);
-  return NextResponse.json({ ok });
+  const tenant = await getRequestTenant(req);
+  const tid = tenant.id;
+
+  // Snapshot the prior stage BEFORE the update so we can pass from→to to the
+  // template matcher.
+  const prior = await getLeadById(tid, params.id);
+  const fromStage = (prior?.stage as string | undefined) ?? null;
+  const toStage = body.stage;
+
+  const ok = await updateLeadStage(tid, params.id, toStage as LeadStage, body.days_in_stage ?? 0);
+
+  // Fire stage-change templated emails (no-op when no template matches).
+  // Best-effort — failures here don't fail the PATCH.
+  let emailResult: any = null;
+  if (ok && fromStage !== toStage) {
+    try {
+      emailResult = await sendStageChangeEmails({
+        tenantId: tid,
+        tenantName: tenant.name,
+        leadId: params.id,
+        fromStage,
+        toStage,
+      });
+    } catch (e) {
+      console.error("stage-change email failed:", (e as Error).message);
+    }
+  }
+
+  return NextResponse.json({ ok, emails: emailResult });
 }
