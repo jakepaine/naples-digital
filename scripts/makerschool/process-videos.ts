@@ -61,7 +61,7 @@ Return strict JSON of shape:
 If this is a chunk of a longer video, only describe what is in THIS chunk.
 No prose, no markdown fences. Just the JSON object.`;
 
-const DELAY_BETWEEN_CALLS_MS = 3_000;
+const DELAY_BETWEEN_CALLS_MS = 8_000;
 const SOFT_DURATION_LIMIT_S = 60 * 60; // chunk anything over 1 hour
 const CHUNK_LENGTH_S = 50 * 60; // 50 min per chunk
 
@@ -193,44 +193,84 @@ async function splitVideo(filePath: string, dir: string): Promise<string[]> {
 // Gemini upload + extract
 // ─────────────────────────────────────────────────────────────────────────────
 
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  label: string,
+  attempts = 6,
+): Promise<T> {
+  let delay = 5_000;
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const is429 =
+        msg.includes("429") ||
+        msg.toLowerCase().includes("too many requests") ||
+        msg.toLowerCase().includes("quota") ||
+        msg.toLowerCase().includes("rate");
+      if (!is429 || i === attempts - 1) throw err;
+      console.log(
+        `    ${label} hit rate limit (attempt ${i + 1}/${attempts}); sleeping ${Math.round(delay / 1000)}s`,
+      );
+      await sleep(delay);
+      delay = Math.min(delay * 2, 5 * 60_000); // cap at 5 min
+    }
+  }
+  throw lastErr;
+}
+
 async function extractFromFile(filePath: string): Promise<{
   extraction: Extraction;
   geminiFileName: string;
 }> {
-  const upload = await gemini.files.upload({
-    file: filePath,
-    config: { mimeType: "video/mp4" },
-  });
+  const upload = await withRetry(
+    () =>
+      gemini.files.upload({
+        file: filePath,
+        config: { mimeType: "video/mp4" },
+      }),
+    "files.upload",
+  );
 
   const fileName = upload.name!;
   let state = upload.state;
   let attempts = 0;
   while (state !== "ACTIVE" && attempts < 90) {
     await sleep(2_000);
-    const refreshed = await gemini.files.get({ name: fileName });
+    const refreshed = await withRetry(
+      () => gemini.files.get({ name: fileName }),
+      "files.get",
+    );
     state = refreshed.state;
     if (state === "FAILED") throw new Error("Gemini file upload FAILED");
     attempts++;
   }
   if (state !== "ACTIVE") throw new Error("Gemini file did not reach ACTIVE");
 
-  const result = await gemini.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { fileData: { fileUri: upload.uri!, mimeType: "video/mp4" } },
-          { text: PROMPT },
+  const result = await withRetry(
+    () =>
+      gemini.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { fileData: { fileUri: upload.uri!, mimeType: "video/mp4" } },
+              { text: PROMPT },
+            ],
+          },
         ],
-      },
-    ],
-    config: {
-      responseMimeType: "application/json",
-      temperature: 0.2,
-      maxOutputTokens: 65_536,
-    },
-  });
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.2,
+          maxOutputTokens: 65_536,
+        },
+      }),
+    "generateContent",
+  );
 
   const text = result.text ?? "";
   let extraction: Extraction;

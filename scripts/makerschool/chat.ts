@@ -22,7 +22,7 @@ import { GoogleGenAI } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
 import * as readline from "node:readline/promises";
 
-const EMBED_MODEL = "text-embedding-004";
+const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIMS = 768;
 const CHAT_MODEL = "claude-sonnet-4-6";
 

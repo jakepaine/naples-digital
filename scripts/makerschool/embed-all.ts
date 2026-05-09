@@ -21,7 +21,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { GoogleGenAI } from "@google/genai";
 
-const EMBED_MODEL = "text-embedding-004";
+const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIMS = 768;
 const TRANSCRIPT_CHUNK_WORDS = 600; // ~ a few minutes of speech
 const TRANSCRIPT_CHUNK_OVERLAP_WORDS = 80;
