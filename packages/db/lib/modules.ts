@@ -18,7 +18,8 @@ export type ModuleKey =
   | "lead_won_invoice"
   | "proposal_generator"
   | "competitor_spy"
-  | "lead_enrichment";
+  | "lead_enrichment"
+  | "lead_scraper";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -159,6 +160,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "sales",
     app: "lead-enrichment",
     addonMonthly: 350,
+  },
+  lead_scraper: {
+    key: "lead_scraper",
+    name: "Lead Scraper",
+    description: "Configure scrape jobs against Apify (Google Maps / LinkedIn / IG actors), Apollo bulk export, PhantomBuster, or Vayne. Cron-able with per-tenant API keys; deduped writes feed Cold Outreach + Lead Enrichment.",
+    category: "sales",
+    app: "lead-scraper",
+    addonMonthly: 300,
   },
 };
 
