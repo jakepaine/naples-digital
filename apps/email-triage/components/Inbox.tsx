@@ -114,6 +114,12 @@ export function Inbox({ initialEmails, tenant }: InboxProps) {
         </div>
         <div className="flex gap-2 items-center">
           <Link
+            href="/auto-reply"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Auto-replies →
+          </Link>
+          <Link
             href="/integrations/gmail"
             className="text-sm text-blue-600 hover:underline"
           >

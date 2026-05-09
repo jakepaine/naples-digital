@@ -519,6 +519,56 @@ export type Database = {
           },
         ]
       }
+      email_auto_reply_templates: {
+        Row: {
+          body_template: string
+          category: string
+          created_at: string
+          enabled: boolean
+          fire_count: number
+          id: string
+          last_fired_at: string | null
+          name: string
+          subject: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          body_template: string
+          category: string
+          created_at?: string
+          enabled?: boolean
+          fire_count?: number
+          id?: string
+          last_fired_at?: string | null
+          name: string
+          subject: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          body_template?: string
+          category?: string
+          created_at?: string
+          enabled?: boolean
+          fire_count?: number
+          id?: string
+          last_fired_at?: string | null
+          name?: string
+          subject?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_auto_reply_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_classifications: {
         Row: {
           actor: string | null

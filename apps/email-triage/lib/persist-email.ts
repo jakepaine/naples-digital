@@ -1,6 +1,16 @@
 import { createServerClient, hasSupabase } from "@naples/db";
 import { classifyEmail, type ClassifyResult } from "./classify";
+import { maybeAutoReply } from "./auto-reply";
+import { maybeAlertHighPriority } from "./slack-alert";
 import type { EmailRow } from "./inbox-query";
+
+export interface IngestOptions {
+  /** Tenant display name — used in template rendering + Slack copy. Optional;
+   *  defaults to "this tenant" if not provided. */
+  tenantName?: string;
+  /** Tenant slug — used in Slack copy for human readability. */
+  tenantSlug?: string;
+}
 
 export interface InboundEmail {
   source?: string; // 'gmail' | 'imap' | 'demo'
@@ -19,9 +29,15 @@ export interface InboundEmail {
 // Idempotent on (tenant_id, source, source_message_id) — re-ingesting the
 // same Gmail message returns the existing row (already classified) instead
 // of re-running the LLM.
+//
+// Side effects after classification:
+//   - Slack alert if category=high_priority (idempotent on emails.slack_notified)
+//   - Auto-reply via Resend if a matching email_auto_reply_templates row exists
+//     (idempotent on emails.auto_replied)
 export async function ingestAndClassify(args: {
   tenantId: string;
   inbound: InboundEmail;
+  opts?: IngestOptions;
 }): Promise<EmailRow> {
   if (!hasSupabase()) {
     throw new Error("ingestAndClassify requires Supabase to be configured.");
@@ -108,6 +124,31 @@ export async function ingestAndClassify(args: {
     reason: classified.reason,
     source: "ai",
   });
+
+  // Side effects: best-effort, never fail the ingest. Both gated on the
+  // updated row's flags so they're idempotent across re-ingests.
+  const tenantName = args.opts?.tenantName ?? "this tenant";
+  const tenantSlug = args.opts?.tenantSlug ?? args.tenantId.slice(0, 8);
+
+  try {
+    await maybeAlertHighPriority({
+      tenantId: args.tenantId,
+      tenantSlug,
+      email: updated as any,
+    });
+  } catch (e) {
+    console.error("slack alert failed:", (e as Error).message);
+  }
+
+  try {
+    await maybeAutoReply({
+      tenantId: args.tenantId,
+      tenantName,
+      email: updated as any,
+    });
+  } catch (e) {
+    console.error("auto-reply failed:", (e as Error).message);
+  }
 
   return updated as any;
 }

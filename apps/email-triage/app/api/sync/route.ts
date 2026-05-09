@@ -26,6 +26,8 @@ export async function POST(req: Request) {
     try {
       const result = await pullGmailInbox({
         tenantId: tenant.id,
+        tenantName: tenant.name,
+        tenantSlug: tenant.slug,
         maxResults: body.maxResults ?? 25,
         query: body.query ?? "in:inbox newer_than:7d",
       });
@@ -77,7 +79,11 @@ export async function POST(req: Request) {
   const results: { id: string; category: string | null }[] = [];
   for (const inbound of inbounds) {
     try {
-      const row = await ingestAndClassify({ tenantId: tenant.id, inbound });
+      const row = await ingestAndClassify({
+        tenantId: tenant.id,
+        inbound,
+        opts: { tenantName: tenant.name, tenantSlug: tenant.slug },
+      });
       results.push({ id: row.id, category: row.category });
     } catch (e) {
       console.error("ingest failed:", (e as Error).message);

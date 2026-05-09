@@ -6,6 +6,8 @@ import { ingestAndClassify, type InboundEmail } from "./persist-email";
 // Idempotent — ingestAndClassify dedupes on (tenant_id, source, source_message_id).
 export async function pullGmailInbox(args: {
   tenantId: string;
+  tenantName?: string;
+  tenantSlug?: string;
   maxResults?: number;
   query?: string; // Gmail search query, default: 'in:inbox newer_than:7d'
 }): Promise<{
@@ -38,6 +40,10 @@ export async function pullGmailInbox(args: {
       await ingestAndClassify({
         tenantId: args.tenantId,
         inbound,
+        opts: {
+          tenantName: args.tenantName,
+          tenantSlug: args.tenantSlug,
+        },
       });
       ingested++;
     } catch (e) {
