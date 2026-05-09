@@ -1732,6 +1732,50 @@ export type Database = {
           },
         ]
       }
+      naples_billing_events: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          id: string
+          payload: Json
+          stripe_customer_id: string | null
+          stripe_event_id: string
+          stripe_event_type: string
+          stripe_subscription_id: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          stripe_customer_id?: string | null
+          stripe_event_id: string
+          stripe_event_type: string
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          stripe_customer_id?: string | null
+          stripe_event_id?: string
+          stripe_event_type?: string
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "naples_billing_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outreach_runs: {
         Row: {
           business_name: string
@@ -2930,40 +2974,61 @@ export type Database = {
       tenants: {
         Row: {
           addons: string[]
+          billing_email: string | null
+          billing_status: string
           brand: Json
+          cancel_at_period_end: boolean
           created_at: string
+          current_period_end: string | null
           enabled_modules: string[]
           id: string
           name: string
           plan: string
           slug: string
           status: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
           tier: string
           updated_at: string
         }
         Insert: {
           addons?: string[]
+          billing_email?: string | null
+          billing_status?: string
           brand?: Json
+          cancel_at_period_end?: boolean
           created_at?: string
+          current_period_end?: string | null
           enabled_modules?: string[]
           id?: string
           name: string
           plan?: string
           slug: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: string
           updated_at?: string
         }
         Update: {
           addons?: string[]
+          billing_email?: string | null
+          billing_status?: string
           brand?: Json
+          cancel_at_period_end?: boolean
           created_at?: string
+          current_period_end?: string | null
           enabled_modules?: string[]
           id?: string
           name?: string
           plan?: string
           slug?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: string
           updated_at?: string
         }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { TIERS, MODULES, type Tier, type ModuleKey } from "@naples/db";
 import clsx from "clsx";
+import { SubscribeButton } from "./SubscribeButton";
 
 const PUBLIC_TIERS: Tier[] = ["starter", "growth", "premium"];
 const POPULAR_KEY: Tier = "growth";
@@ -192,18 +193,8 @@ export function PricingSection() {
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{t.description}</p>
 
-                <a
-                  href="mailto:jake@naples.digital?subject=Naples Digital Pricing"
-                  className={clsx(
-                    "group mt-6 flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-3.5 text-base font-medium transition-all",
-                    popular
-                      ? "border border-gold/50 bg-gradient-to-t from-grad-bronze via-gold to-grad-amber text-white shadow-[0_8px_24px_-8px_rgba(184,137,62,0.7)] hover:from-gold hover:to-white"
-                      : "border border-white/10 bg-gradient-to-t from-ink-deep to-white/[0.06] text-white shadow-lg shadow-black/40 hover:border-gold/30"
-                  )}
-                >
-                  Get started
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </a>
+                <SubscribeButton tier={key} popular={popular} />
+
 
                 <div className="mt-8 space-y-3 border-t border-white/10 pt-6">
                   <h4 className="text-sm font-medium text-white">{headerLabel}</h4>

@@ -142,6 +142,9 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
+      stripe:
+        specifier: ^17.4.0
+        version: 17.7.0
     devDependencies:
       '@types/node':
         specifier: ^20.14.0
