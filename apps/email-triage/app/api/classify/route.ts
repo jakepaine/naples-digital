@@ -1,33 +1,31 @@
 import { NextResponse } from "next/server";
 import { classifyEmail } from "@/lib/classify";
-import { MOCK_EMAILS } from "@/lib/mock-emails";
 
 export const dynamic = "force-dynamic";
 
+// Pure classifier endpoint — does NOT persist. Useful for previewing how an
+// email would be triaged (e.g. paste-in tester for tenants tuning categories).
+// For the full ingest+classify+persist flow, use POST /api/sync.
 export async function POST(req: Request) {
   let body: any;
   try {
     body = await req.json();
   } catch {
-    body = {};
+    return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
   }
-
-  const email =
-    body.email ?? MOCK_EMAILS.find((e) => e.id === body.id) ?? null;
-  if (!email)
+  const email = body?.email ?? body;
+  if (!email?.from_email || !email?.subject) {
     return NextResponse.json(
-      { error: "missing 'email' or unknown 'id'" },
+      { error: "email.from_email and email.subject required" },
       { status: 400 },
     );
-
-  const result = await classifyEmail(email);
-  return NextResponse.json({ ...email, ...result });
-}
-
-export async function GET() {
-  // Convenience: return the full mock inbox classified.
-  const enriched = await Promise.all(
-    MOCK_EMAILS.map(async (e) => ({ ...e, ...(await classifyEmail(e)) })),
-  );
-  return NextResponse.json(enriched);
+  }
+  const result = await classifyEmail({
+    from_email: email.from_email,
+    from_name: email.from_name ?? null,
+    subject: email.subject,
+    preview: email.preview ?? null,
+    body_text: email.body_text ?? null,
+  });
+  return NextResponse.json(result);
 }

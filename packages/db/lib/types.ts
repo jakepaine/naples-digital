@@ -403,6 +403,57 @@ export type Database = {
           },
         ]
       }
+      email_classifications: {
+        Row: {
+          actor: string | null
+          category: string
+          created_at: string
+          email_id: string
+          id: string
+          reason: string | null
+          score: number | null
+          source: string
+          tenant_id: string
+        }
+        Insert: {
+          actor?: string | null
+          category: string
+          created_at?: string
+          email_id: string
+          id?: string
+          reason?: string | null
+          score?: number | null
+          source: string
+          tenant_id: string
+        }
+        Update: {
+          actor?: string | null
+          category?: string
+          created_at?: string
+          email_id?: string
+          id?: string
+          reason?: string | null
+          score?: number | null
+          source?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_classifications_email_id_fkey"
+            columns: ["email_id"]
+            isOneToOne: false
+            referencedRelation: "emails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_classifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_sends: {
         Row: {
           bounced_at: string | null
@@ -475,6 +526,98 @@ export type Database = {
           },
           {
             foreignKeyName: "email_sends_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emails: {
+        Row: {
+          archived: boolean
+          archived_at: string | null
+          auto_replied: boolean
+          auto_reply_text: string | null
+          body_html: string | null
+          body_text: string | null
+          category: string | null
+          classified_at: string | null
+          created_at: string
+          from_email: string
+          from_name: string | null
+          id: string
+          metadata: Json
+          preview: string | null
+          reason: string | null
+          received_at: string
+          score: number | null
+          slack_notified: boolean
+          source: string
+          source_message_id: string | null
+          source_thread_id: string | null
+          subject: string
+          tenant_id: string
+          to_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived?: boolean
+          archived_at?: string | null
+          auto_replied?: boolean
+          auto_reply_text?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          category?: string | null
+          classified_at?: string | null
+          created_at?: string
+          from_email: string
+          from_name?: string | null
+          id?: string
+          metadata?: Json
+          preview?: string | null
+          reason?: string | null
+          received_at: string
+          score?: number | null
+          slack_notified?: boolean
+          source?: string
+          source_message_id?: string | null
+          source_thread_id?: string | null
+          subject?: string
+          tenant_id: string
+          to_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived?: boolean
+          archived_at?: string | null
+          auto_replied?: boolean
+          auto_reply_text?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          category?: string | null
+          classified_at?: string | null
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          metadata?: Json
+          preview?: string | null
+          reason?: string | null
+          received_at?: string
+          score?: number | null
+          slack_notified?: boolean
+          source?: string
+          source_message_id?: string | null
+          source_thread_id?: string | null
+          subject?: string
+          tenant_id?: string
+          to_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emails_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
