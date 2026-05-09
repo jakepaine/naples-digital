@@ -12,7 +12,10 @@ export type ModuleKey =
   | "sponsor_analytics"
   | "backlog"
   | "client_portal"
-  | "mia";
+  | "mia"
+  | "email_triage"
+  | "content_syndication"
+  | "lead_won_invoice";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -105,6 +108,30 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "vertical",
     app: "mia",
     addonMonthly: 1500,
+  },
+  email_triage: {
+    key: "email_triage",
+    name: "Email Triage",
+    description: "AI-classified inbox. Routes inbound mail into priority lanes per tenant. Optional auto-replies.",
+    category: "ops",
+    app: "email-triage",
+    addonMonthly: 150,
+  },
+  content_syndication: {
+    key: "content_syndication",
+    name: "Content Syndication",
+    description: "One post in, five platforms out. Per-tenant credentials, per-platform tone (Twitter/LinkedIn/IG/FB/Medium).",
+    category: "content",
+    app: "content-syndication",
+    addonMonthly: 200,
+  },
+  lead_won_invoice: {
+    key: "lead_won_invoice",
+    name: "Lead Won → Invoice",
+    description: "When a CRM lead closes, draft the invoice + Stripe payment link automatically. Onboarding kicks off on payment.",
+    category: "sales",
+    app: "lead-won-invoice",
+    addonMonthly: 150,
   },
 };
 
