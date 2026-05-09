@@ -7,8 +7,9 @@ WORKDIR /repo
 FROM base AS deps
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/ui/package.json ./packages/ui/
-COPY packages/db/package.json ./packages/db/
+COPY packages/mock-data/package.json ./packages/mock-data/
 COPY packages/outreach/package.json ./packages/outreach/
+COPY packages/db/package.json ./packages/db/
 COPY apps/warmup-monitor/package.json ./apps/warmup-monitor/
 RUN pnpm install --frozen-lockfile=false
 
