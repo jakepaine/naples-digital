@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import { getServerTenant } from "@naples/db/next";
 import { ingestAndClassify } from "@/lib/persist-email";
 import { DEMO_EMAILS } from "@/lib/inbox-query";
+import { pullGmailInbox } from "@/lib/sync-gmail";
+import { TenantGmailMissingError } from "@/lib/gmail-client";
 
 export const dynamic = "force-dynamic";
 
-// Sync trigger. Two modes:
-//   - body.demo === true       → ingest the seeded demo inbox (use without
-//                                 Gmail OAuth; great for screenshots / Kevin demo)
-//   - body.emails: InboundEmail[]  → ingest a batch passed inline
-//
-// Real Gmail OAuth pull lands in a follow-up commit; this endpoint will then
-// also accept body.source='gmail' and pull recent unread mail itself.
+// Sync trigger. Three modes:
+//   - body.demo === true            → ingest the seeded demo inbox
+//   - body.source === "gmail"       → pull from Gmail (requires OAuth)
+//   - body.emails: InboundEmail[]   → ingest a batch passed inline
 export async function POST(req: Request) {
   let body: any = {};
   try {
@@ -22,6 +21,35 @@ export async function POST(req: Request) {
 
   const tenant = await getServerTenant({ fallbackSlug: "naplesdigital" });
 
+  // Mode A — pull from Gmail
+  if (body?.source === "gmail") {
+    try {
+      const result = await pullGmailInbox({
+        tenantId: tenant.id,
+        maxResults: body.maxResults ?? 25,
+        query: body.query ?? "in:inbox newer_than:7d",
+      });
+      return NextResponse.json({
+        ok: true,
+        source: "gmail",
+        tenant: { id: tenant.id, slug: tenant.slug },
+        ...result,
+      });
+    } catch (e) {
+      if (e instanceof TenantGmailMissingError) {
+        return NextResponse.json(
+          { error: "gmail_not_connected", message: e.message },
+          { status: 412 },
+        );
+      }
+      return NextResponse.json(
+        { error: (e as Error).message },
+        { status: 500 },
+      );
+    }
+  }
+
+  // Mode B — demo seed or inline ingest
   let inbounds: any[] = [];
   if (body?.demo === true) {
     inbounds = DEMO_EMAILS().map((e) => ({
@@ -41,7 +69,7 @@ export async function POST(req: Request) {
     inbounds = body.emails;
   } else {
     return NextResponse.json(
-      { error: "pass { demo: true } or { emails: [...] }" },
+      { error: "pass { demo: true }, { source: 'gmail' }, or { emails: [...] }" },
       { status: 400 },
     );
   }

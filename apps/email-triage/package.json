@@ -16,6 +16,7 @@
     "@naples/ui": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
+    "googleapis": "^144.0.0",
     "next": "^14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1"

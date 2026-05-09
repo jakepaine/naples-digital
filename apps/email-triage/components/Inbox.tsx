@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   CATEGORIES,
   CATEGORY_LABEL,
@@ -111,7 +112,13 @@ export function Inbox({ initialEmails, tenant }: InboxProps) {
             inbox using a Worthwhile-default classifier (Nick Saraev pattern).
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Link
+            href="/integrations/gmail"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Gmail settings →
+          </Link>
           <button
             onClick={handleSeedDemo}
             disabled={busy === "demo"}
