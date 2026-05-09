@@ -19,7 +19,8 @@ export type ModuleKey =
   | "proposal_generator"
   | "competitor_spy"
   | "lead_enrichment"
-  | "lead_scraper";
+  | "lead_scraper"
+  | "sla_dashboard";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -168,6 +169,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "sales",
     app: "lead-scraper",
     addonMonthly: 300,
+  },
+  sla_dashboard: {
+    key: "sla_dashboard",
+    name: "Speed-to-Lead SLA",
+    description: "Mobile-first dashboard for cold-email reply queue. 5-minute response countdown per Saraev's 400% conversion-lift threshold. Mark-responded action + escalation Slack on breach.",
+    category: "sales",
+    app: "sla-dashboard",
+    addonMonthly: 200,
   },
 };
 
