@@ -20,7 +20,8 @@ export type ModuleKey =
   | "competitor_spy"
   | "lead_enrichment"
   | "lead_scraper"
-  | "sla_dashboard";
+  | "sla_dashboard"
+  | "onboarding_coach";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -177,6 +178,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "sales",
     app: "sla-dashboard",
     addonMonthly: 200,
+  },
+  onboarding_coach: {
+    key: "onboarding_coach",
+    name: "Onboarding Coach",
+    description: "30-day playbook walking new tenants from setup → first paying customer. Each daily step is backed by an existing Naples module. Follows Saraev's MakerSchool month-1 sequence: Upwork apps + cold email + community + scrape + close.",
+    category: "ops",
+    app: "onboarding-coach",
+    addonMonthly: 250,
   },
 };
 
