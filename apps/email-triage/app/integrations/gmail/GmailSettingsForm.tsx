@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IntegrationStatusCard } from "@naples/ui";
 
 interface Props {
   oauthAppConfigured: boolean;
@@ -71,22 +72,13 @@ export function GmailSettingsForm({ oauthAppConfigured, connection }: Props) {
   if (connection.configured) {
     return (
       <div className="space-y-3">
-        <div className="rounded border border-emerald-200 bg-emerald-50 p-4 text-sm">
-          <div className="font-semibold">Connected.</div>
-          {connection.email_address && (
-            <div className="font-mono mt-1">{connection.email_address}</div>
-          )}
-          <div className="text-xs text-emerald-700 mt-1">
-            Status: <span className="font-mono">{connection.status}</span>
-            {connection.last_verified_at && (
-              <>
-                {" "}
-                · last verified{" "}
-                {new Date(connection.last_verified_at).toLocaleString()}
-              </>
-            )}
-          </div>
-        </div>
+        <IntegrationStatusCard
+          name="Gmail"
+          configured={true}
+          status={connection.status}
+          lastVerifiedAt={connection.last_verified_at}
+          accountIdentifier={connection.email_address}
+        />
         <div className="flex gap-2">
           <button
             onClick={handleSync}

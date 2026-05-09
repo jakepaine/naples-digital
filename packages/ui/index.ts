@@ -9,3 +9,5 @@ export { Card } from "./components/Card";
 export { Button } from "./components/Button";
 export { Badge } from "./components/Badge";
 export { TenantBrandProvider, useTenantBrand, type TenantBrandValue, type TenantBrand } from "./components/TenantBrandProvider";
+export { IntegrationStatusCard, type IntegrationStatusCardProps } from "./components/IntegrationStatusCard";
+export { VaultSecretForm, type VaultSecretFormProps, type VaultSecretField } from "./components/VaultSecretForm";
