@@ -6,6 +6,7 @@
 import type {
   OutreachVendor, PushSequenceInput, PushSequenceResult,
   VendorEvent, WebhookParseResult, VendorKind,
+  AccountWarmupSummary, MailboxWarmup,
 } from "./types";
 import { hmacSha256Hex, timingSafeEq } from "./hmac";
 
@@ -117,5 +118,105 @@ export function createSmartleadVendor(opts: {
       if (fallback) return timingSafeEq(fallback, webhookSecret);
       return false;
     },
+
+    async getAccountWarmup(): Promise<AccountWarmupSummary> {
+      // Smartlead — list email accounts. Returns array of objects with
+      // warmup_details + email + bounce_count.
+      try {
+        type SmartleadAccount = {
+          id?: number;
+          from_email?: string;
+          email?: string;
+          warmup_details?: {
+            warmup_reputation?: number; // 0-100 typically
+            warmup_status?: number; // 1 = active, 0 = paused
+            total_sent_count?: number;
+            total_bounce_count?: number;
+            warmup_score?: number;
+          };
+          warmup_score?: number;
+          created_at?: string;
+        };
+        const data = await call<SmartleadAccount[] | { data: SmartleadAccount[] }>(
+          "/email-accounts/",
+        );
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray((data as any)?.data)
+            ? (data as any).data
+            : [];
+        const mailboxes: MailboxWarmup[] = (items as SmartleadAccount[]).map((it) => {
+          const score = clamp(
+            Number(
+              it.warmup_details?.warmup_reputation ??
+                it.warmup_details?.warmup_score ??
+                it.warmup_score ??
+                0,
+            ),
+            0,
+            100,
+          );
+          const warming = (it.warmup_details?.warmup_status ?? 0) === 1;
+          return {
+            email: String(it.from_email ?? it.email ?? ""),
+            warmup_score: score,
+            warming,
+            sent_count: Number(it.warmup_details?.total_sent_count ?? 0),
+            bounce_count: Number(it.warmup_details?.total_bounce_count ?? 0),
+            connected_at: it.created_at ?? null,
+            health_notes: [],
+          };
+        });
+        return summarize("smartlead", false, mailboxes);
+      } catch {
+        return summarize("smartlead", true, stubSmartleadMailboxes());
+      }
+    },
   };
+}
+
+function clamp(n: number, min: number, max: number): number {
+  if (Number.isNaN(n)) return min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function summarize(
+  vendor: VendorKind,
+  is_stub: boolean,
+  mailboxes: MailboxWarmup[],
+): AccountWarmupSummary {
+  const warming_mailboxes = mailboxes.filter((m) => m.warming).length;
+  const fully_warmed_mailboxes = mailboxes.filter(
+    (m) => m.warmup_score >= 100,
+  ).length;
+  const average_score =
+    mailboxes.length === 0
+      ? 0
+      : Math.round(
+          mailboxes.reduce((acc, m) => acc + m.warmup_score, 0) /
+            mailboxes.length,
+        );
+  return {
+    vendor,
+    is_stub,
+    total_mailboxes: mailboxes.length,
+    warming_mailboxes,
+    fully_warmed_mailboxes,
+    average_score,
+    mailboxes,
+  };
+}
+
+function stubSmartleadMailboxes(): MailboxWarmup[] {
+  const today = Date.now();
+  const profile = [95, 88, 75, 62, 50, 30];
+  return profile.map((score, i) => ({
+    email: `outbound-${i + 1}@stub-smartlead.example`,
+    warmup_score: score,
+    warming: score < 100,
+    sent_count: Math.round(score * 8),
+    bounce_count: i,
+    connected_at: new Date(today - i * 86400000).toISOString(),
+    health_notes: [],
+  }));
 }

@@ -37,6 +37,34 @@ export type WebhookParseResult =
 
 export type VendorKind = "instantly" | "smartlead";
 
+export type MailboxWarmup = {
+  /** The sending email address. */
+  email: string;
+  /** Warmup completion 0-100. 100 = ready for live sends. */
+  warmup_score: number;
+  /** Whether the vendor reports this mailbox as actively warming. */
+  warming: boolean;
+  /** Total emails this mailbox has sent (lifetime, where available). */
+  sent_count: number;
+  /** Bounce count where the vendor exposes it. */
+  bounce_count: number;
+  /** ISO date when the mailbox was connected to the vendor. */
+  connected_at: string | null;
+  /** Notes / health flags surfaced by the vendor (e.g. "DKIM not detected"). */
+  health_notes: string[];
+};
+
+export type AccountWarmupSummary = {
+  vendor: VendorKind;
+  /** True when the result is synthetic (no API key configured). */
+  is_stub: boolean;
+  total_mailboxes: number;
+  warming_mailboxes: number;
+  fully_warmed_mailboxes: number;
+  average_score: number;
+  mailboxes: MailboxWarmup[];
+};
+
 export interface OutreachVendor {
   readonly kind: VendorKind;
   pushSequence(input: PushSequenceInput): Promise<PushSequenceResult>;
@@ -44,6 +72,12 @@ export interface OutreachVendor {
   getStatus(externalId: string): Promise<{ state: string; raw: unknown } | null>;
   parseWebhook(headers: Headers, rawBody: string): Promise<WebhookParseResult>;
   verifyWebhookSignature?(headers: Headers, rawBody: string): Promise<boolean>;
+  /**
+   * Per-mailbox warmup status. Optional on the interface — vendors that
+   * don't expose stats throw a NotImplementedError; callers fall back to
+   * a synthetic stub. Both Instantly and Smartlead implement this.
+   */
+  getAccountWarmup?(): Promise<AccountWarmupSummary>;
 }
 
 export type VendorConstructor = (config: {

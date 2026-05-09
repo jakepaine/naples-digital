@@ -21,7 +21,8 @@ export type ModuleKey =
   | "lead_enrichment"
   | "lead_scraper"
   | "sla_dashboard"
-  | "onboarding_coach";
+  | "onboarding_coach"
+  | "warmup_monitor";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -186,6 +187,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "ops",
     app: "onboarding-coach",
     addonMonthly: 250,
+  },
+  warmup_monitor: {
+    key: "warmup_monitor",
+    name: "Warmup Monitor",
+    description: "Per-mailbox warmup gauge for Instantly + Smartlead. Surface what % of your sending capacity is ready before flipping the cold-email switch on Day 22.",
+    category: "ops",
+    app: "warmup-monitor",
+    addonMonthly: 100,
   },
 };
 

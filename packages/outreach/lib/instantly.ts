@@ -12,6 +12,7 @@
 import type {
   OutreachVendor, PushSequenceInput, PushSequenceResult,
   VendorEvent, WebhookParseResult, VendorKind,
+  AccountWarmupSummary, MailboxWarmup,
 } from "./types";
 import { hmacSha256Hex, timingSafeEq } from "./hmac";
 
@@ -147,5 +148,111 @@ export function createInstantlyVendor(opts: {
       if (fallback) return timingSafeEq(fallback, webhookSecret);
       return false;
     },
+
+    async getAccountWarmup(): Promise<AccountWarmupSummary> {
+      // Instantly v2 — paginated /accounts list returns mailboxes with
+      // fields including warmup_score, warmup_status, sent_count, etc.
+      // We pull up to 200 accounts (one page) which covers the typical
+      // Saraev recommendation of 9 mailboxes by a wide margin.
+      try {
+        type InstantlyAccount = {
+          email: string;
+          warmup_status?: number; // 1 = warming, 2 = paused, 3 = error
+          warmup_score?: number; // 0-100
+          warmup?: { status?: string; warmup_advanced?: { warm_up_advanced?: any } };
+          stat_warmup_score?: number;
+          sent_count?: number;
+          bounce_count?: number;
+          timestamp_created?: string;
+          status?: number;
+          status_label?: string;
+        };
+        type ListAccountsResponse = {
+          items: InstantlyAccount[];
+          total?: number;
+        };
+        const data = await call<ListAccountsResponse>("/accounts?limit=200");
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const mailboxes: MailboxWarmup[] = items.map((it) => {
+          const score = clamp(
+            Number(
+              it.stat_warmup_score ??
+                it.warmup_score ??
+                0,
+            ),
+            0,
+            100,
+          );
+          const warming =
+            it.warmup_status === 1 ||
+            (typeof it.warmup?.status === "string" &&
+              it.warmup.status.toLowerCase() === "active");
+          const notes: string[] = [];
+          if (it.status_label) notes.push(`status: ${it.status_label}`);
+          if (typeof it.warmup_status === "number" && it.warmup_status === 3)
+            notes.push("warmup error reported by Instantly — check the mailbox");
+          return {
+            email: String(it.email ?? ""),
+            warmup_score: score,
+            warming,
+            sent_count: Number(it.sent_count ?? 0),
+            bounce_count: Number(it.bounce_count ?? 0),
+            connected_at: it.timestamp_created ?? null,
+            health_notes: notes,
+          };
+        });
+        return summarize("instantly", false, mailboxes);
+      } catch {
+        return summarize("instantly", true, stubInstantlyMailboxes());
+      }
+    },
   };
+}
+
+function clamp(n: number, min: number, max: number): number {
+  if (Number.isNaN(n)) return min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function summarize(
+  vendor: VendorKind,
+  is_stub: boolean,
+  mailboxes: MailboxWarmup[],
+): AccountWarmupSummary {
+  const warming_mailboxes = mailboxes.filter((m) => m.warming).length;
+  const fully_warmed_mailboxes = mailboxes.filter(
+    (m) => m.warmup_score >= 100,
+  ).length;
+  const average_score =
+    mailboxes.length === 0
+      ? 0
+      : Math.round(
+          mailboxes.reduce((acc, m) => acc + m.warmup_score, 0) /
+            mailboxes.length,
+        );
+  return {
+    vendor,
+    is_stub,
+    total_mailboxes: mailboxes.length,
+    warming_mailboxes,
+    fully_warmed_mailboxes,
+    average_score,
+    mailboxes,
+  };
+}
+
+function stubInstantlyMailboxes(): MailboxWarmup[] {
+  // 9 mailboxes — Saraev's #255 recommended baseline. Spread the
+  // warmup % so the dashboard renders a useful gradient.
+  const today = Date.now();
+  const profile = [98, 92, 85, 73, 70, 64, 50, 33, 12];
+  return profile.map((score, i) => ({
+    email: `outbound-${i + 1}@stub.example`,
+    warmup_score: score,
+    warming: score < 100,
+    sent_count: Math.round(score * 12),
+    bounce_count: Math.round(Math.max(0, (5 - i) * 0.4)),
+    connected_at: new Date(today - i * 86400000).toISOString(),
+    health_notes: i === 0 ? ["fully warmed — ready to send"] : [],
+  }));
 }
