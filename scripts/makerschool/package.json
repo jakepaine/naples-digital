@@ -9,6 +9,7 @@
     "process-videos:doppler": "doppler run --project naples-digital --config prd -- tsx process-videos.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@google/genai": "^0.7.0",
     "@supabase/supabase-js": "^2.45.0"
   },
