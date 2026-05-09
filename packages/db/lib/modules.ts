@@ -17,7 +17,8 @@ export type ModuleKey =
   | "content_syndication"
   | "lead_won_invoice"
   | "proposal_generator"
-  | "competitor_spy";
+  | "competitor_spy"
+  | "lead_enrichment";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -150,6 +151,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "content",
     app: "competitor-spy",
     addonMonthly: 250,
+  },
+  lead_enrichment: {
+    key: "lead_enrichment",
+    name: "Lead Enrichment",
+    description: "Multi-source enrichment chain (Apollo → AnyMailFinder → Hunter → Apify) with quality scoring. Turns LinkedIn URLs / domains into verified emails plus AI icebreakers, ready to push into Cold Outreach.",
+    category: "sales",
+    app: "lead-enrichment",
+    addonMonthly: 350,
   },
 };
 

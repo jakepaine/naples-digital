@@ -199,7 +199,8 @@ export type TenantIntegrationKind =
   | "assemblyai" | "opusclip" | "stripe" | "resend" | "buffer" | "publer"
   | "klaviyo" | "meta" | "ghl"
   | "apify" | "batchskiptracing" | "postmark"
-  | "gmail" | "twitter" | "linkedin" | "medium" | "slack";
+  | "gmail" | "twitter" | "linkedin" | "medium" | "slack"
+  | "anymailfinder" | "hunter" | "phantombuster" | "vayne";
 
 export type TenantIntegration = {
   id: string;
