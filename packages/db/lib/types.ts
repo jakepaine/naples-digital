@@ -2926,6 +2926,147 @@ export type Database = {
           },
         ]
       }
+      podcast_episode_inbox: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          episode_id: string | null
+          external_guid: string
+          feed_id: string
+          id: string
+          ingested_at: string
+          notes: string | null
+          promoted_at: string | null
+          promoted_by_user_id: string | null
+          published_at: string | null
+          raw: Json
+          status: string
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          episode_id?: string | null
+          external_guid: string
+          feed_id: string
+          id?: string
+          ingested_at?: string
+          notes?: string | null
+          promoted_at?: string | null
+          promoted_by_user_id?: string | null
+          published_at?: string | null
+          raw?: Json
+          status?: string
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          episode_id?: string | null
+          external_guid?: string
+          feed_id?: string
+          id?: string
+          ingested_at?: string
+          notes?: string | null
+          promoted_at?: string | null
+          promoted_by_user_id?: string | null
+          published_at?: string | null
+          raw?: Json
+          status?: string
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_episode_inbox_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "episodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "podcast_episode_inbox_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "podcast_feeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "podcast_episode_inbox_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      podcast_feeds: {
+        Row: {
+          auto_promote: boolean
+          created_at: string
+          default_show: string | null
+          enabled: boolean
+          feed_url: string
+          id: string
+          last_item_published_at: string | null
+          last_polled_at: string | null
+          name: string | null
+          notes: string | null
+          poll_interval_minutes: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_promote?: boolean
+          created_at?: string
+          default_show?: string | null
+          enabled?: boolean
+          feed_url: string
+          id?: string
+          last_item_published_at?: string | null
+          last_polled_at?: string | null
+          name?: string | null
+          notes?: string | null
+          poll_interval_minutes?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auto_promote?: boolean
+          created_at?: string
+          default_show?: string | null
+          enabled?: boolean
+          feed_url?: string
+          id?: string
+          last_item_published_at?: string | null
+          last_polled_at?: string | null
+          name?: string | null
+          notes?: string | null
+          poll_interval_minutes?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_feeds_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projections: {
         Row: {
           conservative: number

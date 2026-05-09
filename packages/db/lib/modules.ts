@@ -25,7 +25,9 @@ export type ModuleKey =
   | "warmup_monitor"
   | "tone_calibrator"
   | "ig_reels_research"
-  | "rss_commentary";
+  | "rss_commentary"
+  | "podcast_repurposing"
+  | "outreach_experiments";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -222,6 +224,22 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "content",
     app: "rss-commentary",
     addonMonthly: 150,
+  },
+  podcast_repurposing: {
+    key: "podcast_repurposing",
+    name: "Podcast Repurposing Engine",
+    description: "Subscribe to podcast RSS feeds. New episodes auto-ingest into an inbox. Promote → AssemblyAI transcript → Claude clip-pick → 9:16 vertical render with karaoke captions. Saves the manual upload-each-episode step for podcasters running a multi-show network.",
+    category: "content",
+    app: "content-pipeline",
+    addonMonthly: 350,
+  },
+  outreach_experiments: {
+    key: "outreach_experiments",
+    name: "Sequence A/B Testing",
+    description: "Run head-to-head tests on cold-email sequences. Define 2+ variants per experiment, push leads through weighted-random assignment, see per-variant open / reply / bounce / unsubscribe rates with auto winner suggestion when sample size + delta thresholds clear.",
+    category: "sales",
+    app: "outreach-dispatcher",
+    addonMonthly: 200,
   },
 };
 
