@@ -12,7 +12,8 @@
     "./deliverability": "./lib/deliverability.ts",
     "./list-unsubscribe": "./lib/list-unsubscribe.ts",
     "./complaint-monitor": "./lib/complaint-monitor.ts",
-    "./voice-profile": "./lib/voice-profile.ts"
+    "./voice-profile": "./lib/voice-profile.ts",
+    "./experiment": "./lib/experiment.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

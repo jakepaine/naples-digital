@@ -29,6 +29,18 @@ export {
   type VoiceFingerprint,
   type VoiceExtraction,
 } from "./lib/voice-profile";
+export {
+  pickVariant,
+  pushLeadIntoExperiment,
+  recordAssignmentOutcome,
+  summarizeVariant,
+  type SequenceVariant,
+  type Experiment,
+  type PushIntoExperimentInput,
+  type PushIntoExperimentResult,
+  type WebhookOutcome,
+  type VariantSummary,
+} from "./lib/experiment";
 
 // Resolve a tenant's configured vendor. Returns null if not configured.
 export async function getOutreachVendorForTenant(tenantId: string): Promise<OutreachVendor | null> {

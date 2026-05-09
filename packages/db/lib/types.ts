@@ -2582,6 +2582,142 @@ export type Database = {
           },
         ]
       }
+      outreach_experiments: {
+        Row: {
+          created_at: string
+          hypothesis: string | null
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          winner_decided_at: string | null
+          winner_variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          hypothesis?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          winner_decided_at?: string | null
+          winner_variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          hypothesis?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          winner_decided_at?: string | null
+          winner_variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_experiments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_experiments_winner_variant_id_fkey"
+            columns: ["winner_variant_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_sequence_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_lead_assignments: {
+        Row: {
+          bounced_at: string | null
+          created_at: string
+          experiment_id: string
+          first_open_at: string | null
+          id: string
+          lead_email: string
+          lead_name: string | null
+          pushed_at: string
+          raw: Json
+          reply_at: string | null
+          reply_intent: string | null
+          tenant_id: string
+          unsubscribed_at: string | null
+          updated_at: string
+          variant_id: string
+          vendor_external_id: string | null
+          vendor_kind: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          created_at?: string
+          experiment_id: string
+          first_open_at?: string | null
+          id?: string
+          lead_email: string
+          lead_name?: string | null
+          pushed_at?: string
+          raw?: Json
+          reply_at?: string | null
+          reply_intent?: string | null
+          tenant_id: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          variant_id: string
+          vendor_external_id?: string | null
+          vendor_kind?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          created_at?: string
+          experiment_id?: string
+          first_open_at?: string | null
+          id?: string
+          lead_email?: string
+          lead_name?: string | null
+          pushed_at?: string
+          raw?: Json
+          reply_at?: string | null
+          reply_intent?: string | null
+          tenant_id?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          variant_id?: string
+          vendor_external_id?: string | null
+          vendor_kind?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_lead_assignments_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_lead_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_lead_assignments_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_sequence_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outreach_runs: {
         Row: {
           business_name: string
@@ -2616,6 +2752,75 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "outreach_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_sequence_variants: {
+        Row: {
+          bounced_count: number
+          created_at: string
+          experiment_id: string
+          id: string
+          name: string
+          notes: string | null
+          opened_count: number
+          positive_reply_count: number
+          pushed_count: number
+          replied_count: number
+          sequence: Json
+          tenant_id: string
+          traffic_weight: number
+          unsubscribed_count: number
+          updated_at: string
+        }
+        Insert: {
+          bounced_count?: number
+          created_at?: string
+          experiment_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          opened_count?: number
+          positive_reply_count?: number
+          pushed_count?: number
+          replied_count?: number
+          sequence?: Json
+          tenant_id: string
+          traffic_weight?: number
+          unsubscribed_count?: number
+          updated_at?: string
+        }
+        Update: {
+          bounced_count?: number
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          opened_count?: number
+          positive_reply_count?: number
+          pushed_count?: number
+          replied_count?: number
+          sequence?: Json
+          tenant_id?: string
+          traffic_weight?: number
+          unsubscribed_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_sequence_variants_experiment_fk"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_sequence_variants_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

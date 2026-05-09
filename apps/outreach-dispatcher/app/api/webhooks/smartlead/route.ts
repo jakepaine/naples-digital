@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSmartleadVendor } from "@naples/outreach/smartlead";
+import { recordAssignmentOutcome } from "@naples/outreach/experiment";
 import {
   recordEmailEvent, getSequenceByExternalId, updateSequenceState,
   updateLeadStage, getTenantBySlug, getTenantIntegration,
+  createServerClient, hasSupabase,
 } from "@naples/db";
 
 export const runtime = "nodejs";
@@ -34,6 +36,7 @@ export async function POST(req: Request) {
   const parsed = await vendor.parseWebhook(req.headers, rawBody);
   if (!parsed.ok) return NextResponse.json({ ok: false, error: parsed.error }, { status: 200 });
 
+  const supabase = hasSupabase() ? createServerClient() : null;
   for (const event of parsed.events) {
     if (event.externalSendId) {
       await recordEmailEvent({
@@ -53,6 +56,20 @@ export async function POST(req: Request) {
           await updateSequenceState(seq.tenant_id, seq.id, "bounced");
         }
       }
+    }
+    if (supabase && (event.kind === "opened" || event.kind === "replied" || event.kind === "bounced" || event.kind === "unsubscribed")) {
+      const payloadEmail = ((event.payload ?? {}) as Record<string, unknown>).lead_email
+        ?? ((event.payload ?? {}) as Record<string, unknown>).email;
+      await recordAssignmentOutcome({
+        supabase,
+        tenantId: tenant.id,
+        outcome: {
+          kind: event.kind,
+          leadEmail: typeof payloadEmail === "string" ? payloadEmail : undefined,
+          vendorExternalId: event.externalLeadId,
+          raw: event.payload,
+        },
+      });
     }
   }
 
