@@ -23,7 +23,8 @@ export type ModuleKey =
   | "sla_dashboard"
   | "onboarding_coach"
   | "warmup_monitor"
-  | "tone_calibrator";
+  | "tone_calibrator"
+  | "ig_reels_research";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -204,6 +205,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "ops",
     app: "tone-calibrator",
     addonMonthly: 100,
+  },
+  ig_reels_research: {
+    key: "ig_reels_research",
+    name: "IG Reels Research",
+    description: "Track competitor IG creators. Apify pulls their new Reels, Gemini transcribes the audio, Claude tags the hook pattern + retention signal + niche relevance. Research-only — surfaces what's working in your niche to inform your own content.",
+    category: "content",
+    app: "ig-reels-research",
+    addonMonthly: 200,
   },
 };
 
