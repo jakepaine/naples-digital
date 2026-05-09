@@ -22,7 +22,8 @@ export type ModuleKey =
   | "lead_scraper"
   | "sla_dashboard"
   | "onboarding_coach"
-  | "warmup_monitor";
+  | "warmup_monitor"
+  | "tone_calibrator";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -194,6 +195,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     description: "Per-mailbox warmup gauge for Instantly + Smartlead. Surface what % of your sending capacity is ready before flipping the cold-email switch on Day 22.",
     category: "ops",
     app: "warmup-monitor",
+    addonMonthly: 100,
+  },
+  tone_calibrator: {
+    key: "tone_calibrator",
+    name: "Email Tone Calibrator",
+    description: "Paste 3 sent emails — Claude fingerprints your voice and constrains every downstream copy module (icebreakers, sequences, auto-replies) so they don't sound like generic AI marketing.",
+    category: "ops",
+    app: "tone-calibrator",
     addonMonthly: 100,
   },
 };

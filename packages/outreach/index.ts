@@ -23,6 +23,12 @@ export {
   type AlertSeverity,
   type AlertKind,
 } from "./lib/complaint-monitor";
+export {
+  extractVoiceProfile,
+  getVoicePromptPreface,
+  type VoiceFingerprint,
+  type VoiceExtraction,
+} from "./lib/voice-profile";
 
 // Resolve a tenant's configured vendor. Returns null if not configured.
 export async function getOutreachVendorForTenant(tenantId: string): Promise<OutreachVendor | null> {
