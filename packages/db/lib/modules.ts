@@ -24,7 +24,8 @@ export type ModuleKey =
   | "onboarding_coach"
   | "warmup_monitor"
   | "tone_calibrator"
-  | "ig_reels_research";
+  | "ig_reels_research"
+  | "rss_commentary";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -213,6 +214,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "content",
     app: "ig-reels-research",
     addonMonthly: 200,
+  },
+  rss_commentary: {
+    key: "rss_commentary",
+    name: "RSS Commentary Loop",
+    description: "Subscribe to industry RSS feeds. Cron polls each, Claude writes a vertical-specific commentary post per item (agree / disagree / extend / refute / translate-to-vertical). Operator approves before publish — Naples never auto-publishes.",
+    category: "content",
+    app: "rss-commentary",
+    addonMonthly: 150,
   },
 };
 
