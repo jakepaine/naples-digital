@@ -500,6 +500,7 @@ async function processOne(
 
   const duration = await probeDuration(video.url);
   const tmp = await mkdtemp(join(tmpdir(), "makerschool-"));
+  const uploadedGeminiFiles: string[] = [];
   try {
     console.log(`  duration: ${duration ?? "?"}s; downloading…`);
     const filePath = await downloadVideo(video.url, tmp);
@@ -524,6 +525,7 @@ async function processOne(
       console.log(`  chunk ${i + 1}/${chunks.length}: extracting…`);
       const { extraction, geminiFileName } = await extractFromFile(chunkPath);
       parts.push(extraction);
+      uploadedGeminiFiles.push(geminiFileName);
       lastFileName = geminiFileName;
       if (i < chunks.length - 1) await sleep(DELAY_BETWEEN_CALLS_MS);
     }
@@ -557,6 +559,18 @@ async function processOne(
     return "failed";
   } finally {
     await rm(tmp, { recursive: true, force: true });
+    // Best-effort cleanup of Gemini Files API uploads. The Files API has a
+    // 20 GB per-project storage cap; leaving extracted videos around will
+    // wedge future runs.
+    for (const name of uploadedGeminiFiles) {
+      try {
+        await gemini.files.delete({ name });
+      } catch (e) {
+        console.warn(
+          `  warn: failed to delete gemini file ${name}: ${(e as Error).message}`,
+        );
+      }
+    }
   }
 }
 
