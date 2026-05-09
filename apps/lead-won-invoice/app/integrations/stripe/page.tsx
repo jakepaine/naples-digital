@@ -77,12 +77,18 @@ export default async function StripeIntegrationPage() {
             >
               Webhooks
             </a>{" "}
-            → Add endpoint, paste your URL{" "}
-            <span className="font-mono">
-              {`${process.env.NEXT_PUBLIC_LEAD_WON_INVOICE_URL ?? "<this-app-url>"}/api/webhooks/stripe`}
-            </span>
-            , subscribe to <span className="font-mono">invoice.paid</span>, then
-            copy the <span className="font-mono">Signing secret</span>.
+            → Add endpoint, paste your unique tenant URL:
+            <pre className="mt-2 rounded border border-gray-300 bg-white p-2 text-xs font-mono break-all">
+              {`${process.env.NEXT_PUBLIC_LEAD_WON_INVOICE_URL ?? "<this-app-url>"}/api/webhooks/stripe/${tenant.id}`}
+            </pre>
+            Subscribe to <span className="font-mono">invoice.paid</span>, then
+            copy the <span className="font-mono">Signing secret</span> (starts
+            with <span className="font-mono">whsec_</span>) and paste it
+            into the form above.
+          </li>
+          <li>
+            Webhook signature is verified per-tenant — calls without a valid
+            signature are rejected with 401.
           </li>
         </ol>
       </div>

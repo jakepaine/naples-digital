@@ -8,12 +8,19 @@ export class TenantStripeMissingError extends Error {
   }
 }
 
+interface TenantStripeBundle {
+  client: Stripe;
+  webhookSecret: string | null;
+}
+
 // Returns a Stripe SDK client scoped to the tenant's Stripe Secret Key
 // (decrypted from Supabase Vault on demand). Caches per-tenant for the
 // lifetime of the Node process — invalidated only on cold start.
-const cache = new Map<string, Stripe>();
+const cache = new Map<string, TenantStripeBundle>();
 
-export async function getTenantStripe(tenantId: string): Promise<Stripe> {
+async function loadTenantStripeBundle(
+  tenantId: string,
+): Promise<TenantStripeBundle> {
   const hit = cache.get(tenantId);
   if (hit) return hit;
 
@@ -30,13 +37,28 @@ export async function getTenantStripe(tenantId: string): Promise<Stripe> {
   });
   if (error) throw new Error(`get_tenant_secret failed: ${error.message}`);
   const row = (data ?? [])[0] as
-    | { out_secret: string; out_status: string }
+    | { out_secret: string; out_status: string; out_config: any }
     | undefined;
   if (!row || !row.out_secret) throw new TenantStripeMissingError(tenantId);
 
   const client = new Stripe(row.out_secret, { apiVersion: "2025-02-24.acacia" });
-  cache.set(tenantId, client);
-  return client;
+  const webhookSecret =
+    typeof row.out_config?.webhook_secret === "string"
+      ? row.out_config.webhook_secret
+      : null;
+  const bundle = { client, webhookSecret };
+  cache.set(tenantId, bundle);
+  return bundle;
+}
+
+export async function getTenantStripe(tenantId: string): Promise<Stripe> {
+  return (await loadTenantStripeBundle(tenantId)).client;
+}
+
+export async function getTenantWebhookSecret(
+  tenantId: string,
+): Promise<string | null> {
+  return (await loadTenantStripeBundle(tenantId)).webhookSecret;
 }
 
 export function invalidateTenantStripe(tenantId: string): void {
