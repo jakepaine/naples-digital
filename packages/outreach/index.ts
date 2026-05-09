@@ -5,6 +5,24 @@ import { getTenantIntegration } from "@naples/db";
 
 export * from "./lib/types";
 export { createInstantlyVendor, createSmartleadVendor };
+export {
+  auditDomainDeliverability,
+  type DeliverabilityAudit,
+} from "./lib/deliverability";
+export {
+  buildListUnsubscribeHeaders,
+  checkListUnsubscribeCompliance,
+  type ListUnsubscribeHeaders,
+  type HeaderComplianceCheck,
+} from "./lib/list-unsubscribe";
+export {
+  evaluateAccountStats,
+  THRESHOLDS as DELIVERABILITY_THRESHOLDS,
+  type VendorAccountStats,
+  type DeliverabilityAlertCandidate,
+  type AlertSeverity,
+  type AlertKind,
+} from "./lib/complaint-monitor";
 
 // Resolve a tenant's configured vendor. Returns null if not configured.
 export async function getOutreachVendorForTenant(tenantId: string): Promise<OutreachVendor | null> {
