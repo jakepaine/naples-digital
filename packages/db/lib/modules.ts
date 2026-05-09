@@ -15,7 +15,8 @@ export type ModuleKey =
   | "mia"
   | "email_triage"
   | "content_syndication"
-  | "lead_won_invoice";
+  | "lead_won_invoice"
+  | "proposal_generator";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -132,6 +133,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "sales",
     app: "lead-won-invoice",
     addonMonthly: 150,
+  },
+  proposal_generator: {
+    key: "proposal_generator",
+    name: "Proposal Generator",
+    description: "AI-drafted client proposals from CRM leads. Approve once, mint a hosted public URL, customer accepts or rejects in-page.",
+    category: "sales",
+    app: "proposal-generator",
+    addonMonthly: 200,
   },
 };
 

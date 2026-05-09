@@ -1781,6 +1781,93 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          approved_at: string | null
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          deliverables: Json
+          expires_at: string | null
+          id: string
+          intro: string | null
+          lead_id: string | null
+          metadata: Json
+          notes: string | null
+          pricing: Json
+          public_token: string | null
+          responded_at: string | null
+          scope_items: Json
+          sent_at: string | null
+          status: string
+          tenant_id: string
+          timeline_weeks: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          deliverables?: Json
+          expires_at?: string | null
+          id?: string
+          intro?: string | null
+          lead_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          pricing?: Json
+          public_token?: string | null
+          responded_at?: string | null
+          scope_items?: Json
+          sent_at?: string | null
+          status?: string
+          tenant_id: string
+          timeline_weeks?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          deliverables?: Json
+          expires_at?: string | null
+          id?: string
+          intro?: string | null
+          lead_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          pricing?: Json
+          public_token?: string | null
+          responded_at?: string | null
+          scope_items?: Json
+          sent_at?: string | null
+          status?: string
+          tenant_id?: string
+          timeline_weeks?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       re_broker_emails: {
         Row: {
           body_text: string | null
