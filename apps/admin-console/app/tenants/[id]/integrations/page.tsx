@@ -5,12 +5,14 @@ import { IntegrationsManager } from "@/components/IntegrationsManager";
 export const dynamic = "force-dynamic";
 
 const VENDORS = [
+  { kind: "slack", label: "Slack", category: "alerts", help: "Incoming Webhook URL (https://hooks.slack.com/services/...) — used for inbound-lead alerts, high-priority email pings, etc." },
   { kind: "instantly", label: "Instantly", category: "outreach", help: "API key from app.instantly.ai → Settings → Integrations" },
   { kind: "smartlead", label: "Smartlead", category: "outreach", help: "API key from app.smartlead.ai → Settings" },
   { kind: "apollo", label: "Apollo", category: "enrichment", help: "API key from app.apollo.io → Settings → Integrations → API" },
   { kind: "clay", label: "Clay", category: "enrichment", help: "API key from clay.com → Settings" },
   { kind: "assemblyai", label: "AssemblyAI", category: "transcription", help: "API key from app.assemblyai.com → Account" },
   { kind: "stripe", label: "Stripe", category: "billing", help: "Secret key from dashboard.stripe.com → Developers → API keys" },
+  { kind: "resend", label: "Resend", category: "email", help: "API key from resend.com → API Keys (used for stage-change emails, welcome emails, etc.)" },
 ] as const;
 
 export default async function IntegrationsPage({ params }: { params: { id: string } }) {

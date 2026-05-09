@@ -1,9 +1,10 @@
-// Send a Slack notification when a new lead lands via inbound webhook.
-// Uses the platform-level SLACK_WEBHOOK_INBOUND_LEADS env (single channel
-// across tenants for now). Per-tenant routing is a follow-up — would store
-// the webhook URL in tenant_integrations.config.
+import { notifyTenantSlack } from "@naples/db";
 
+// Send a Slack notification when a new lead lands via inbound webhook.
+// Tenant-aware: pulls per-tenant Slack webhook from Vault first, falls back
+// to platform SLACK_WEBHOOK_INBOUND_LEADS env var if no tenant integration.
 export async function notifySlackInboundLead(args: {
+  tenantId: string;
   tenantSlug: string;
   lead: {
     id: string;
@@ -15,9 +16,6 @@ export async function notifySlackInboundLead(args: {
     source?: string;
   };
 }): Promise<void> {
-  const url = process.env.SLACK_WEBHOOK_INBOUND_LEADS;
-  if (!url) return;
-
   const lines = [
     `*New inbound lead* — tenant: \`${args.tenantSlug}\``,
     `*Name:* ${args.lead.name}`,
@@ -29,15 +27,9 @@ export async function notifySlackInboundLead(args: {
     `_lead id:_ \`${args.lead.id}\``,
   ].filter(Boolean) as string[];
 
-  const body = JSON.stringify({ text: lines.join("\n") });
-
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body,
-    });
-  } catch (e) {
-    console.error("slack notify failed:", (e as Error).message);
-  }
+  await notifyTenantSlack({
+    tenantId: args.tenantId,
+    text: lines.join("\n"),
+    opts: { envFallback: "SLACK_WEBHOOK_INBOUND_LEADS" },
+  });
 }

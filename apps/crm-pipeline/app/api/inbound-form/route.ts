@@ -66,6 +66,7 @@ export async function POST(req: Request) {
 
   // Fire-and-forget Slack alert
   await notifySlackInboundLead({
+    tenantId: tenant.id,
     tenantSlug: tenant.slug,
     lead: {
       id: lead.id,

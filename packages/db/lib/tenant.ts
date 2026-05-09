@@ -198,7 +198,8 @@ export type TenantIntegrationKind =
   | "instantly" | "smartlead" | "apollo" | "clay"
   | "assemblyai" | "opusclip" | "stripe" | "resend" | "buffer" | "publer"
   | "klaviyo" | "meta" | "ghl"
-  | "apify" | "batchskiptracing" | "postmark";
+  | "apify" | "batchskiptracing" | "postmark"
+  | "gmail" | "twitter" | "linkedin" | "medium" | "slack";
 
 export type TenantIntegration = {
   id: string;
