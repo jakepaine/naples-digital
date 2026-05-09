@@ -250,6 +250,137 @@ export type Database = {
           },
         ]
       }
+      competitor_ads: {
+        Row: {
+          ad_archive_id: string
+          ad_text: string | null
+          ai_summary: string | null
+          asset_type: string | null
+          brand_id: string
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          first_seen_at: string | null
+          hook_tactic: string | null
+          id: string
+          image_url: string | null
+          last_seen_at: string | null
+          messaging_angle: string | null
+          offer_type: string | null
+          raw: Json
+          tenant_id: string
+          updated_at: string
+          video_url: string | null
+          visual_format: string | null
+          weeks_in_top10: number
+        }
+        Insert: {
+          ad_archive_id: string
+          ad_text?: string | null
+          ai_summary?: string | null
+          asset_type?: string | null
+          brand_id: string
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          first_seen_at?: string | null
+          hook_tactic?: string | null
+          id?: string
+          image_url?: string | null
+          last_seen_at?: string | null
+          messaging_angle?: string | null
+          offer_type?: string | null
+          raw?: Json
+          tenant_id: string
+          updated_at?: string
+          video_url?: string | null
+          visual_format?: string | null
+          weeks_in_top10?: number
+        }
+        Update: {
+          ad_archive_id?: string
+          ad_text?: string | null
+          ai_summary?: string | null
+          asset_type?: string | null
+          brand_id?: string
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          first_seen_at?: string | null
+          hook_tactic?: string | null
+          id?: string
+          image_url?: string | null
+          last_seen_at?: string | null
+          messaging_angle?: string | null
+          offer_type?: string | null
+          raw?: Json
+          tenant_id?: string
+          updated_at?: string
+          video_url?: string | null
+          visual_format?: string | null
+          weeks_in_top10?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_ads_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_ads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_brands: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          fb_page_id: string | null
+          id: string
+          last_synced_at: string | null
+          name: string
+          notes: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          fb_page_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          name: string
+          notes?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          fb_page_id?: string | null
+          id?: string
+          last_synced_at?: string | null
+          name?: string
+          notes?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_brands_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_posts: {
         Row: {
           body: string

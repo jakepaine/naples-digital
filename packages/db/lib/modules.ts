@@ -16,7 +16,8 @@ export type ModuleKey =
   | "email_triage"
   | "content_syndication"
   | "lead_won_invoice"
-  | "proposal_generator";
+  | "proposal_generator"
+  | "competitor_spy";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -141,6 +142,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     category: "sales",
     app: "proposal-generator",
     addonMonthly: 200,
+  },
+  competitor_spy: {
+    key: "competitor_spy",
+    name: "Competitor Ad Spy",
+    description: "Track competitor Meta ads via Apify. Claude tags each ad's angle/hook/offer so you see what's working in your niche.",
+    category: "content",
+    app: "competitor-spy",
+    addonMonthly: 250,
   },
 };
 
