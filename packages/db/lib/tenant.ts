@@ -200,7 +200,8 @@ export type TenantIntegrationKind =
   | "klaviyo" | "meta" | "ghl"
   | "apify" | "batchskiptracing" | "postmark"
   | "gmail" | "twitter" | "linkedin" | "medium" | "slack"
-  | "anymailfinder" | "hunter" | "phantombuster" | "vayne";
+  | "anymailfinder" | "hunter" | "phantombuster" | "vayne"
+  | "bland";
 
 export type TenantIntegration = {
   id: string;

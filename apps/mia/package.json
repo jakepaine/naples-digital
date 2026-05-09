@@ -10,6 +10,7 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@naples/db": "workspace:*",
     "@naples/ui": "workspace:*",
     "next": "^14.2.35",
