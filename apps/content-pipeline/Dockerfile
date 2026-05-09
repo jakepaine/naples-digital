@@ -35,3 +35,4 @@ ENV PORT=3006
 EXPOSE 3006
 
 CMD ["node", "apps/content-pipeline/server.js"]
+
