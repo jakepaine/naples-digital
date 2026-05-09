@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PLATFORMS, type Platform } from "@/lib/platforms";
-
-interface Variant {
-  platform: Platform;
-  text: string;
-  hashtags: string[];
-}
+import type { PostWithVariants } from "@/lib/persist-post";
 
 const SAMPLE = {
   title: "How we cut Stripe disputes by 71% in 30 days",
@@ -22,101 +16,104 @@ problem in disguise. Spend an afternoon mapping your top 5 support tickets to
 the moment in the user journey that confused someone, and your queue gets
 shorter than any new hire could make it.`,
   sourceUrl: "https://naplesdigital.com/blog/disputes-71-percent",
+  imageUrl: "",
 };
 
-export function Composer() {
+export function Composer({
+  onSaved,
+}: {
+  onSaved: (post: PostWithVariants) => void;
+}) {
   const [title, setTitle] = useState(SAMPLE.title);
   const [body, setBody] = useState(SAMPLE.body);
   const [sourceUrl, setSourceUrl] = useState(SAMPLE.sourceUrl);
-  const [variants, setVariants] = useState<Variant[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(SAMPLE.imageUrl);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleTailor() {
-    setLoading(true);
-    setVariants(null);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
     try {
-      const res = await fetch("/api/tailor", {
+      const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title, body, sourceUrl }),
+        body: JSON.stringify({
+          title,
+          body,
+          sourceUrl: sourceUrl || undefined,
+          imageUrl: imageUrl || undefined,
+        }),
       });
       const json = await res.json();
-      setVariants(json.results);
+      if (!res.ok) throw new Error(json.error ?? "save failed");
+      if (json.saved) onSaved({ post: json.post, variants: json.variants });
+    } catch (e) {
+      setError((e as Error).message);
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
   return (
-    <div className="mx-auto max-w-5xl p-8 space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold">Content Syndication</h1>
-        <p className="text-sm text-gray-500 mt-2">
-          Paste a long-form post. Get five platform-tailored variants. Publishing
-          to each platform uses per-tenant credentials (wired up in the next
-          implementation pass).
-        </p>
-      </header>
-
-      <section className="space-y-3 border border-gray-200 p-5 rounded-lg">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-3 border border-gray-200 p-5 rounded-lg bg-white"
+    >
+      {error && (
+        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+      <label className="block">
+        <span className="text-sm font-medium">Title</span>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
+          required
+        />
+      </label>
+      <label className="block">
+        <span className="text-sm font-medium">Body</span>
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          rows={10}
+          className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
+          required
+        />
+      </label>
+      <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="text-sm font-medium">Title</span>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium">Body</span>
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={8}
-            className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium">Source URL (optional)</span>
+          <span className="text-sm font-medium">
+            Source URL <span className="text-gray-400">(optional)</span>
+          </span>
           <input
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}
             className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
           />
         </label>
-        <button
-          onClick={handleTailor}
-          disabled={loading}
-          className="px-4 py-2 bg-black text-white rounded disabled:opacity-50"
-        >
-          {loading ? "Tailoring…" : "Tailor for 5 platforms"}
-        </button>
-      </section>
-
-      {variants && (
-        <section className="space-y-4">
-          {PLATFORMS.map((p) => {
-            const v = variants.find((x) => x.platform === p);
-            if (!v) return null;
-            return (
-              <div key={p} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold capitalize">{p}</h3>
-                  <span className="text-xs text-gray-400">
-                    {v.text.length} chars
-                  </span>
-                </div>
-                <pre className="whitespace-pre-wrap text-sm">{v.text}</pre>
-                {v.hashtags.length > 0 && (
-                  <div className="mt-2 text-xs text-blue-600">
-                    {v.hashtags.join(" ")}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </section>
-      )}
-    </div>
+        <label className="block">
+          <span className="text-sm font-medium">
+            Image URL <span className="text-gray-400">(optional)</span>
+          </span>
+          <input
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className="mt-1 w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </label>
+      </div>
+      <button
+        type="submit"
+        disabled={busy}
+        className="px-4 py-2 bg-black text-white rounded text-sm disabled:opacity-50"
+      >
+        {busy ? "Tailoring + saving…" : "Tailor for 5 platforms + save"}
+      </button>
+    </form>
   );
 }

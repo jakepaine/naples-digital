@@ -250,6 +250,56 @@ export type Database = {
           },
         ]
       }
+      content_posts: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          metadata: Json
+          source_url: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          source_url?: string | null
+          status?: string
+          tenant_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          source_url?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_posts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_submissions: {
         Row: {
           asset_type: string
@@ -321,6 +371,72 @@ export type Database = {
           },
           {
             foreignKeyName: "content_submissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_variants: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          external_id: string | null
+          hashtags: string[]
+          id: string
+          platform: string
+          post_id: string
+          published_at: string | null
+          published_url: string | null
+          scheduled_at: string | null
+          status: string
+          tenant_id: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          external_id?: string | null
+          hashtags?: string[]
+          id?: string
+          platform: string
+          post_id: string
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          external_id?: string | null
+          hashtags?: string[]
+          id?: string
+          platform?: string
+          post_id?: string
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_variants_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "content_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_variants_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

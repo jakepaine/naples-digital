@@ -8,6 +8,10 @@ export const PLATFORMS = [
 
 export type Platform = (typeof PLATFORMS)[number];
 
+export function isValidPlatform(s: unknown): s is Platform {
+  return typeof s === "string" && (PLATFORMS as readonly string[]).includes(s);
+}
+
 export interface PlatformConstraints {
   charLimit: number;
   tone: string;
