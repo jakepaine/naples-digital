@@ -8,6 +8,7 @@
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",
+    "typecheck": "pnpm --filter './apps/*' --workspace-concurrency=4 exec tsc --noEmit",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

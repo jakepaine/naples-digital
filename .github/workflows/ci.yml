@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Lint is intentionally NOT wired up yet — every app's `lint` script is
+      # `next lint` but no .eslintrc.* exists anywhere in the repo, so
+      # `pnpm lint` either hangs on an interactive prompt or no-ops.
+      # Track the ESLint setup item in the Naples backlog and re-add this
+      # step once a real config lands.
+
+      - name: Typecheck
+        run: pnpm typecheck
