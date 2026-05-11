@@ -27,6 +27,23 @@ export async function maybeAutoReply(args: {
     return { sent: 0, failed: 0, skipped: 0 };
   }
 
+  // Claim the row atomically before any Resend call. Without this, two
+  // concurrent invocations (Instantly webhook retry, overlapping Gmail
+  // sync, etc.) both pass the `auto_replied` check at the top of this
+  // function and both fire the same auto-reply. The .eq("auto_replied",
+  // false) precondition turns the claim into a compare-and-set: only one
+  // caller wins, the rest see 0 rows updated and bail.
+  const { data: claim } = await sb
+    .from("emails")
+    .update({ auto_replied: true })
+    .eq("id", args.email.id)
+    .eq("auto_replied", false)
+    .select("id")
+    .maybeSingle();
+  if (!claim) {
+    return { sent: 0, failed: 0, skipped: templates.length };
+  }
+
   // Resend key (per-tenant first, platform fallback)
   let resendKey: string | undefined;
   let fromAddress: string | undefined;
@@ -97,12 +114,16 @@ export async function maybeAutoReply(args: {
   }
 
   if (sent > 0) {
+    // Flag already flipped by the claim above; just persist the body.
     await sb
       .from("emails")
-      .update({
-        auto_replied: true,
-        auto_reply_text: lastSentText,
-      })
+      .update({ auto_reply_text: lastSentText })
+      .eq("id", args.email.id);
+  } else {
+    // All sends failed — revert the claim so the next sync pass retries.
+    await sb
+      .from("emails")
+      .update({ auto_replied: false })
       .eq("id", args.email.id);
   }
 
