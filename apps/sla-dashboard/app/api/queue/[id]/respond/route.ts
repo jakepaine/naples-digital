@@ -8,13 +8,21 @@ export async function POST(
   _req: Request,
   ctx: { params: { id: string } },
 ) {
-  const tenant = await getServerTenant({ fallbackSlug: "naplesdigital" });
-  const result = await markResponded({
-    tenantId: tenant.id,
-    id: ctx.params.id,
-  });
-  if (!result.ok) {
-    return NextResponse.json({ error: "not found" }, { status: 404 });
+  try {
+    const tenant = await getServerTenant({ fallbackSlug: "naplesdigital" });
+    const result = await markResponded({
+      tenantId: tenant.id,
+      id: ctx.params.id,
+    });
+    if (!result.ok) {
+      return NextResponse.json({ error: "not found" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true, item: result.row });
+  } catch (err) {
+    console.error("sla respond route failed:", (err as Error).message);
+    return NextResponse.json(
+      { error: (err as Error).message ?? "internal error" },
+      { status: 500 },
+    );
   }
-  return NextResponse.json({ ok: true, item: result.row });
 }
