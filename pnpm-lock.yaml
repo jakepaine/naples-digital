@@ -1472,6 +1472,9 @@ importers:
       '@naples/db':
         specifier: workspace:*
         version: link:../db
+      '@supabase/supabase-js':
+        specifier: ^2.45.4
+        version: 2.105.1
     devDependencies:
       '@types/node':
         specifier: ^20.14.0
