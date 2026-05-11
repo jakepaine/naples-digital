@@ -1,4 +1,5 @@
 import { createServerClient, hasSupabase } from "./server";
+import { modulesForTier, type Tier, type ModuleKey } from "./modules";
 
 export type TenantBrand = {
   logo_url?: string;
@@ -323,13 +324,28 @@ export async function deleteTenantSecret(
   return !error && data === true;
 }
 
+// Default tier when caller passes a legacy `plan` but no `tier`. The form
+// at apps/admin-console/components/CreateTenantForm.tsx still sends `plan`.
+// Without this map, new tenants would land with enabled_modules={} and
+// nothing would work until someone ran a manual SQL backfill.
+const PLAN_TO_DEFAULT_TIER: Record<Tenant["plan"], Tier> = {
+  starter: "starter",
+  pro: "growth",
+  agency: "premium",
+};
+
 export async function createTenant(input: {
   slug: string;
   name: string;
   brand?: TenantBrand;
   plan?: Tenant["plan"];
+  tier?: Tier;
+  enabled_modules?: ModuleKey[];
 }): Promise<Tenant | null> {
   if (!hasSupabase()) return null;
+  const plan = input.plan ?? "starter";
+  const tier = input.tier ?? PLAN_TO_DEFAULT_TIER[plan];
+  const enabledModules = input.enabled_modules ?? modulesForTier(tier);
   const sb = createServerClient();
   const { data, error } = await sb
     .from("tenants")
@@ -337,7 +353,9 @@ export async function createTenant(input: {
       slug: input.slug,
       name: input.name,
       brand: input.brand ?? {},
-      plan: input.plan ?? "starter",
+      plan,
+      tier,
+      enabled_modules: enabledModules,
       status: "active",
     })
     .select("*")

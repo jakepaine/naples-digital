@@ -22,6 +22,8 @@ export async function POST(req: Request) {
     name: body.name,
     brand: body.brand,
     plan: body.plan ?? "starter",
+    tier: body.tier,
+    enabled_modules: body.enabled_modules,
   });
   if (!t) return NextResponse.json({ error: "Failed to create — slug may already exist" }, { status: 409 });
   return NextResponse.json({ tenant: t });
