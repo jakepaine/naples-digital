@@ -107,4 +107,18 @@ set_ai_service  backlog             apps/backlog/Dockerfile
 set_ai_service  mia                  apps/mia/Dockerfile
 set_ai_service  mia-onmarket-cron    apps/mia-onmarket-cron/Dockerfile
 
+# Phase 11+ services. AI users get the Anthropic key via set_ai_service;
+# non-AI dashboards (sla-dashboard, onboarding-coach, warmup-monitor) only
+# need the common env. Per README line 110, the AI list also includes
+# lead-scraper (icebreaker generation) and tone-calibrator (voice profiles).
+set_ai_service  email-triage         apps/email-triage/Dockerfile
+set_ai_service  lead-enrichment      apps/lead-enrichment/Dockerfile
+set_ai_service  lead-scraper         apps/lead-scraper/Dockerfile
+set_common      sla-dashboard        apps/sla-dashboard/Dockerfile
+set_common      onboarding-coach     apps/onboarding-coach/Dockerfile
+set_common      warmup-monitor       apps/warmup-monitor/Dockerfile
+set_ai_service  tone-calibrator      apps/tone-calibrator/Dockerfile
+set_ai_service  ig-reels-research    apps/ig-reels-research/Dockerfile
+set_ai_service  rss-commentary       apps/rss-commentary/Dockerfile
+
 echo "✓ Env vars synced across all services."
