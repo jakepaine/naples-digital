@@ -13,7 +13,8 @@
     "./resend": "./lib/resend.ts",
     "./pricing": "./lib/pricing.ts",
     "./sync": "./lib/sync.ts",
-    "./snapshot": "./lib/snapshot.ts"
+    "./snapshot": "./lib/snapshot.ts",
+    "./queries": "./lib/queries.ts"
   },
   "dependencies": {
     "@naples/db": "workspace:*"

@@ -11,3 +11,10 @@ export {
   type SyncResult,
 } from "./lib/sync";
 export { computeAnthropicCost } from "./lib/pricing";
+export {
+  listTenantUsageSnapshots,
+  getTenantUsageSummary,
+  type UsageSnapshotRow,
+  type VendorRollup,
+  type UsageSummary,
+} from "./lib/queries";

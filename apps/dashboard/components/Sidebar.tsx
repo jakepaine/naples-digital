@@ -8,6 +8,7 @@ import {
   Video,
   CircleDollarSign,
   Mail,
+  Gauge,
   Settings,
 } from "lucide-react";
 import clsx from "clsx";
@@ -20,6 +21,7 @@ const ITEMS = [
   { href: "/content", label: "Content Pipeline", icon: Video },
   { href: "/revenue", label: "Revenue & Commissions", icon: CircleDollarSign },
   { href: "/outreach", label: "Outreach", icon: Mail },
+  { href: "/usage", label: "Usage & Spend", icon: Gauge },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
