@@ -18,3 +18,8 @@ export {
   type VendorRollup,
   type UsageSummary,
 } from "./lib/queries";
+export {
+  getTenantSpendCapStatus,
+  maybeAlertSpendCap,
+  type SpendCapStatus,
+} from "./lib/cap";

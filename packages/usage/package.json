@@ -14,7 +14,8 @@
     "./pricing": "./lib/pricing.ts",
     "./sync": "./lib/sync.ts",
     "./snapshot": "./lib/snapshot.ts",
-    "./queries": "./lib/queries.ts"
+    "./queries": "./lib/queries.ts",
+    "./cap": "./lib/cap.ts"
   },
   "dependencies": {
     "@naples/db": "workspace:*"

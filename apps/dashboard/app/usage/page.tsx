@@ -2,8 +2,8 @@ import { Card, Badge } from "@naples/ui";
 import { Kpi } from "@/components/Kpi";
 import { UsageTrendChart } from "@/components/UsageTrendChart";
 import { getServerTenantId } from "@naples/db/next";
-import { getTenantUsageSummary, type VendorRollup } from "@naples/usage";
-import { Sparkles, Bot, AudioLines, Send, Wallet, TrendingUp } from "lucide-react";
+import { getTenantUsageSummary, getTenantSpendCapStatus, type VendorRollup } from "@naples/usage";
+import { Sparkles, Bot, AudioLines, Send, Wallet, TrendingUp, ShieldAlert } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,10 @@ const VENDOR_META: Record<VendorRollup["vendor"], { label: string; icon: typeof 
 
 export default async function UsagePage() {
   const tid = await getServerTenantId();
-  const summary = await getTenantUsageSummary(tid);
+  const [summary, cap] = await Promise.all([
+    getTenantUsageSummary(tid),
+    getTenantSpendCapStatus(tid),
+  ]);
   return (
     <main className="px-8 py-8">
       <header className="mb-8">
@@ -47,6 +50,51 @@ export default async function UsagePage() {
           Per-vendor API spend across the Naples-managed metered stack. Updated daily from each vendor&rsquo;s usage API. These line items appear on your monthly Stripe invoice at exact vendor cost — no markup.
         </p>
       </header>
+
+      {cap.reason !== "uncapped" && (
+        <section className="mb-6">
+          <Card>
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <ShieldAlert
+                  className={`mt-0.5 h-4 w-4 ${
+                    cap.reason === "blocked"
+                      ? "text-rose"
+                      : cap.reason === "warning"
+                        ? "text-amber"
+                        : "text-emerald"
+                  }`}
+                />
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Monthly spend cap</div>
+                  <div className="mt-1 font-heading text-lg text-cream">
+                    ${cap.current_month_usd.toFixed(2)} of ${cap.cap_usd.toFixed(2)} ({(cap.percent_of_cap * 100).toFixed(1)}%)
+                  </div>
+                  <div className="mt-1 text-xs text-muted">
+                    {cap.reason === "blocked"
+                      ? "Cap reached. New API calls are paused until the cap is raised or the month resets."
+                      : cap.reason === "warning"
+                        ? "Approaching cap. Operator alert sent. Raise the cap or expect a pause this month."
+                        : "Within cap. No action needed."}
+                  </div>
+                </div>
+              </div>
+              <div className="h-2 w-40 overflow-hidden rounded-full bg-card-border">
+                <div
+                  className={`h-full ${
+                    cap.reason === "blocked"
+                      ? "bg-rose"
+                      : cap.reason === "warning"
+                        ? "bg-amber"
+                        : "bg-emerald"
+                  }`}
+                  style={{ width: `${Math.min(100, cap.percent_of_cap * 100)}%` }}
+                />
+              </div>
+            </div>
+          </Card>
+        </section>
+      )}
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Kpi
