@@ -1,0 +1,25 @@
+{
+  "name": "@naples/usage",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./lib/types.ts",
+    "./anthropic": "./lib/anthropic.ts",
+    "./apify": "./lib/apify.ts",
+    "./assemblyai": "./lib/assemblyai.ts",
+    "./resend": "./lib/resend.ts",
+    "./pricing": "./lib/pricing.ts",
+    "./sync": "./lib/sync.ts",
+    "./snapshot": "./lib/snapshot.ts"
+  },
+  "dependencies": {
+    "@naples/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.3"
+  }
+}

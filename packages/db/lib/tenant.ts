@@ -202,7 +202,11 @@ export type TenantIntegrationKind =
   | "apify" | "batchskiptracing" | "postmark"
   | "gmail" | "twitter" | "linkedin" | "medium" | "slack"
   | "anymailfinder" | "hunter" | "phantombuster" | "vayne"
-  | "bland";
+  | "bland"
+  // Centralized billing — Naples runs the vendor account, this row
+  // stores the per-tenant attribution handle (workspace_id for
+  // Anthropic, etc.) rather than a tenant-owned secret.
+  | "anthropic";
 
 export type TenantIntegration = {
   id: string;
