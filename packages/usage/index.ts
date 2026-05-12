@@ -23,3 +23,8 @@ export {
   maybeAlertSpendCap,
   type SpendCapStatus,
 } from "./lib/cap";
+export {
+  pushUsageToStripe,
+  type PushResult,
+  type PushSummary,
+} from "./lib/stripe";

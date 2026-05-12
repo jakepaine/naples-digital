@@ -15,7 +15,8 @@
     "./sync": "./lib/sync.ts",
     "./snapshot": "./lib/snapshot.ts",
     "./queries": "./lib/queries.ts",
-    "./cap": "./lib/cap.ts"
+    "./cap": "./lib/cap.ts",
+    "./stripe": "./lib/stripe.ts"
   },
   "dependencies": {
     "@naples/db": "workspace:*"
