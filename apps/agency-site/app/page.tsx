@@ -52,31 +52,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Customer logo strip */}
-      <section className="border-y border-card-border bg-bg-deep py-12">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <p className="text-center text-xs font-medium uppercase tracking-[0.18em] text-faint">
-            Trusted by service businesses across Southwest Florida
-          </p>
-          <div className="mt-8 grid grid-cols-2 items-center gap-6 sm:grid-cols-3 md:grid-cols-5">
-            {[
-              "239 LIVE",
-              "MIA Real Estate",
-              "Lifewise",
-              "Naples Digital",
-              "Jake Paine",
-            ].map((name) => (
-              <div
-                key={name}
-                className="text-center font-heading text-sm font-medium tracking-tight text-faint transition-colors hover:text-cream"
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Two-column: pitch + product mock */}
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">

@@ -21,7 +21,7 @@ export default function PricingPage() {
             Tiered subscription. Pick what fits.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-body">
-            Three public tiers, two custom. Tiers bundle a default module set; add-ons enable individual modules above tier. Usage costs (Anthropic, scrapers) passed through at cost or capped per tier.
+            Three public tiers, two custom. Tiers bundle a default module set; add-ons enable individual modules above tier. You bring your own keys for usage-based vendors — we wire them into your tenant during setup and never mark up usage.
           </p>
         </div>
       </section>
@@ -208,8 +208,8 @@ export default function PricingPage() {
           <Faq q="What if I only need one module?">
             Add-ons are available à la carte above the Starter tier. If you only need one or two modules, we can quote you the Starter tier plus the specific add-ons.
           </Faq>
-          <Faq q="What about usage-based costs (Anthropic, scrapers)?">
-            Each tier comes with usage caps. Above the cap, we either bill at cost or you upgrade tier — your choice. Caps are sized so most businesses never hit them.
+          <Faq q="What about usage-based costs (Anthropic, scrapers, email delivery)?">
+            You bring your own keys for usage-based vendors — Anthropic, Apify, AssemblyAI, Apollo / Hunter / AnyMailFinder, Instantly or Smartlead, Resend. The setup fee covers the work of standing up those accounts and wiring each key into your tenant via our integrations vault. You pay vendors directly at their published rates. We never touch your usage bill and we never mark it up.
           </Faq>
           <Faq q="Can I take the code with me if I leave?">
             No. Naples Digital is a managed platform — you license access to the tenant, not the code. Your data is yours, and we provide CSV/JSON export anytime. Code, integrations, infrastructure, maintenance, and new modules are part of what the subscription covers.

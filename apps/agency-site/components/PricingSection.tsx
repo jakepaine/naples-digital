@@ -11,16 +11,10 @@ import { SubscribeButton } from "./SubscribeButton";
 const PUBLIC_TIERS: Tier[] = ["starter", "growth", "premium"];
 const POPULAR_KEY: Tier = "growth";
 
-// Industry-standard SaaS yearly pricing: 10 months for the price of 12 (~17% off)
-const yearlyOf = (monthly: number) => monthly * 10;
-
-function modulesAddedAt(tier: Tier): ModuleKey[] {
-  const idx = PUBLIC_TIERS.indexOf(tier);
-  const current = TIERS[tier].modules as ModuleKey[];
-  if (idx <= 0) return current;
-  const prev = new Set(TIERS[PUBLIC_TIERS[idx - 1]].modules as ModuleKey[]);
-  return current.filter((m) => !prev.has(m));
-}
+// Industry-standard SaaS yearly pricing: 10 months for the price of 12 (~17% off).
+// Yearly billing collects (monthly * 10) up-front; displayed as effective monthly cost.
+const yearlyTotal = (monthly: number) => monthly * 10;
+const yearlyMonthlyEquivalent = (monthly: number) => Math.round((monthly * 10) / 12);
 
 function PricingToggle({ isYearly, onChange }: { isYearly: boolean; onChange: (y: boolean) => void }) {
   return (
@@ -148,13 +142,9 @@ export function PricingSection() {
           {PUBLIC_TIERS.map((key, idx) => {
             const t = TIERS[key];
             const popular = key === POPULAR_KEY;
-            const price = isYearly ? yearlyOf(t.monthlyPrice) : t.monthlyPrice;
-            const tierIdx = PUBLIC_TIERS.indexOf(key);
-            const modules = tierIdx === 0 ? (t.modules as ModuleKey[]) : modulesAddedAt(key);
-            const headerLabel =
-              tierIdx === 0
-                ? "Starter includes:"
-                : `Everything in ${TIERS[PUBLIC_TIERS[tierIdx - 1]].name}, plus:`;
+            const price = isYearly ? yearlyMonthlyEquivalent(t.monthlyPrice) : t.monthlyPrice;
+            const annualTotal = yearlyTotal(t.monthlyPrice);
+            const modules = t.modules as ModuleKey[];
 
             return (
               <motion.div
@@ -189,7 +179,10 @@ export function PricingSection() {
                       className="font-heading text-4xl font-semibold tracking-tightest"
                     />
                   </span>
-                  <span className="text-sm text-white/55">/{isYearly ? "year" : "month"}</span>
+                  <span className="text-sm text-white/55">/month</span>
+                </div>
+                <div className="mt-1 h-4 text-xs text-white/45">
+                  {isYearly ? `Billed annually — $${annualTotal.toLocaleString()}/yr` : "Billed monthly"}
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{t.description}</p>
 
@@ -197,7 +190,7 @@ export function PricingSection() {
 
 
                 <div className="mt-8 space-y-3 border-t border-white/10 pt-6">
-                  <h4 className="text-sm font-medium text-white">{headerLabel}</h4>
+                  <h4 className="text-sm font-medium text-white">Modules included</h4>
                   <ul className="space-y-2.5">
                     {modules.map((mKey) => (
                       <li key={mKey} className="flex items-center gap-2.5 text-sm text-white/70">
