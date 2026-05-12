@@ -1,0 +1,22 @@
+{
+  "name": "@naples/usage-sync",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "echo 'No build — runtime is tsx'",
+    "start": "tsx src/main.ts",
+    "tick": "tsx src/tick-once.ts",
+    "clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "@naples/db": "workspace:*",
+    "@naples/usage": "workspace:*",
+    "@supabase/supabase-js": "^2.45.4",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.3"
+  }
+}
