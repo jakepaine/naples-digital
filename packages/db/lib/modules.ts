@@ -27,7 +27,8 @@ export type ModuleKey =
   | "ig_reels_research"
   | "rss_commentary"
   | "podcast_repurposing"
-  | "outreach_experiments";
+  | "outreach_experiments"
+  | "usage_observability";
 
 export type ModuleCategory = "ops" | "sales" | "content" | "vertical";
 
@@ -241,6 +242,14 @@ export const MODULES: Record<ModuleKey, ModuleDef> = {
     app: "outreach-dispatcher",
     addonMonthly: 200,
   },
+  usage_observability: {
+    key: "usage_observability",
+    name: "Usage & Spend Dashboard",
+    description: "Unified per-vendor spend dashboard. Anthropic, Apify, AssemblyAI, Resend usage tracked daily, shown as transparent line items on your monthly Stripe invoice. See exact cost per vendor, projected end-of-month spend, and 30-day trend. Optional monthly spend cap as a hard circuit-breaker against runaway usage.",
+    category: "ops",
+    app: "dashboard",
+    addonMonthly: 200,
+  },
 };
 
 export type Tier = "starter" | "growth" | "premium" | "design_partner" | "enterprise";
@@ -279,8 +288,8 @@ export const TIERS: Record<Tier, TierDef> = {
     name: "Premium",
     monthlyPrice: 1997,
     setupFee: 5000,
-    modules: ["dashboard", "crm", "booking", "backlog", "outreach", "content", "sponsor_pitch", "sponsor_analytics", "client_portal"],
-    description: "Established business across multiple channels. Full ops dashboard, sponsor analytics, branded client portal.",
+    modules: ["dashboard", "crm", "booking", "backlog", "outreach", "content", "sponsor_pitch", "sponsor_analytics", "client_portal", "usage_observability"],
+    description: "Established business across multiple channels. Full ops dashboard, sponsor analytics, branded client portal, usage + spend visibility across every vendor.",
     isCustom: false,
   },
   design_partner: {
@@ -288,7 +297,7 @@ export const TIERS: Record<Tier, TierDef> = {
     name: "Design Partner",
     monthlyPrice: 750,
     setupFee: 5000,
-    modules: ["dashboard", "crm", "booking", "backlog", "outreach", "content", "sponsor_pitch", "sponsor_analytics", "client_portal"],
+    modules: ["dashboard", "crm", "booking", "backlog", "outreach", "content", "sponsor_pitch", "sponsor_analytics", "client_portal", "usage_observability"],
     description: "Premium feature set at half price. 12-month commitment in exchange for case study + roadmap input. Available to first 3 paying tenants only.",
     isCustom: false,
   },
