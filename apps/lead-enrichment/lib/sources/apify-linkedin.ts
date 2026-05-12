@@ -17,6 +17,7 @@ import {
   emailLooksValid,
   isRoleBased,
 } from "./types";
+import { recordApifyRun, extractApifyRunId } from "@naples/usage";
 
 const RUN_TIMEOUT_MS = 45_000;
 
@@ -26,7 +27,7 @@ export const apifyLinkedinSource: EnrichmentSource = {
   isConfigured({ apiKey }) {
     return !!apiKey;
   },
-  async enrich({ apiKey, input }) {
+  async enrich({ apiKey, input, tenantId }) {
     const started = Date.now();
     if (!apiKey) return stubResult(input, started);
 
@@ -58,6 +59,15 @@ export const apifyLinkedinSource: EnrichmentSource = {
           maxItems: 1,
         }),
       });
+      const apifyRunId = extractApifyRunId(res.headers);
+      if (apifyRunId && tenantId) {
+        await recordApifyRun({
+          tenantId,
+          apifyRunId,
+          actorId,
+          sourceApp: "lead-enrichment",
+        }).catch(() => null);
+      }
       const items = (await res.json().catch(() => [])) as any[];
       const profile = Array.isArray(items) ? items[0] : null;
       const email =

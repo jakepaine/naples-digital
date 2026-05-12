@@ -7,6 +7,7 @@ FROM base AS deps
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/db/package.json ./packages/db/
 COPY packages/mock-data/package.json ./packages/mock-data/
+COPY packages/usage/package.json ./packages/usage/
 COPY apps/mia-onmarket-cron/package.json ./apps/mia-onmarket-cron/
 RUN pnpm install --frozen-lockfile=false
 

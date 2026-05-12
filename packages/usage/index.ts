@@ -28,3 +28,4 @@ export {
   type PushResult,
   type PushSummary,
 } from "./lib/stripe";
+export { recordApifyRun, extractApifyRunId } from "./lib/apify-record";

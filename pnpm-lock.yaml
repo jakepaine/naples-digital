@@ -335,6 +335,9 @@ importers:
       '@naples/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@naples/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -671,6 +674,9 @@ importers:
       '@naples/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@naples/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -720,6 +726,9 @@ importers:
       '@naples/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@naples/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -769,6 +778,9 @@ importers:
       '@naples/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@naples/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -916,6 +928,9 @@ importers:
       '@naples/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@naples/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       '@supabase/supabase-js':
         specifier: ^2.45.4
         version: 2.105.1

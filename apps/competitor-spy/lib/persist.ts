@@ -127,9 +127,10 @@ export async function syncBrand(args: {
   }
 
   const ads = await pullFbAdsForBrand({
-    apifyToken,
+    apifyToken: apifyToken ?? undefined,
     pageId: (brand as any).fb_page_id,
     brandName: (brand as any).name,
+    tenantId: args.tenantId,
   });
 
   const errors: string[] = [];

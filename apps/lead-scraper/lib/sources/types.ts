@@ -51,5 +51,7 @@ export interface ScrapeSource {
     params: Record<string, unknown>;
     /** Hard cap on results returned to the caller. */
     maxLeads: number;
+    /** Tenant invoking the run — enables per-tenant usage attribution. */
+    tenantId?: string;
   }): Promise<ScrapeOutcome>;
 }

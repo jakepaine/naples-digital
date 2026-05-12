@@ -9,6 +9,8 @@
 // first — falls back to platform APIFY_TOKEN. The actor id is configurable
 // via APIFY_ACTOR_FB_ADS env (defaults to apify/facebook-ads-library-scraper).
 
+import { recordApifyRun, extractApifyRunId } from "@naples/usage";
+
 export interface RawApifyAd {
   ad_archive_id: string;
   page_name: string;
@@ -35,6 +37,7 @@ export async function pullFbAdsForBrand(args: {
   brandName: string;
   countryCode?: string;
   maxAds?: number;
+  tenantId?: string;
 }): Promise<RawApifyAd[]> {
   const token = args.apifyToken ?? process.env.APIFY_TOKEN;
   if (!token) {
@@ -71,6 +74,15 @@ export async function pullFbAdsForBrand(args: {
       body: JSON.stringify(input),
     },
   );
+  const apifyRunId = extractApifyRunId(runRes.headers);
+  if (apifyRunId && args.tenantId) {
+    await recordApifyRun({
+      tenantId: args.tenantId,
+      apifyRunId,
+      actorId,
+      sourceApp: "competitor-spy",
+    }).catch(() => null);
+  }
   if (!runRes.ok) {
     throw new Error(
       `apify run failed: ${runRes.status} ${await runRes.text().catch(() => "")}`,

@@ -4,6 +4,8 @@
 // Falls back to deterministic stub data when no token configured so
 // the dashboard renders the workflow shape on day one.
 
+import { recordApifyRun, extractApifyRunId } from "@naples/usage";
+
 export interface RawReel {
   ig_shortcode: string;
   ig_url: string | null;
@@ -25,6 +27,7 @@ export async function pullReelsForCreator(args: {
   apifyToken?: string | null;
   handle: string;
   maxReels?: number;
+  tenantId?: string;
 }): Promise<RawReel[]> {
   const token = args.apifyToken;
   if (!token) return stubReels(args.handle, args.maxReels ?? 6);
@@ -44,6 +47,15 @@ export async function pullReelsForCreator(args: {
         resultsLimit: max,
       }),
     });
+    const apifyRunId = extractApifyRunId(res.headers);
+    if (apifyRunId && args.tenantId) {
+      await recordApifyRun({
+        tenantId: args.tenantId,
+        apifyRunId,
+        actorId,
+        sourceApp: "ig-reels-research",
+      }).catch(() => null);
+    }
     if (!res.ok) {
       // Soft-fail: return stub instead of throwing
       return stubReels(handle, max);

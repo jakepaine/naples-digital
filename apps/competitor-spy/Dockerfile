@@ -8,6 +8,8 @@ FROM base AS deps
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/db/package.json ./packages/db/
+COPY packages/mock-data/package.json ./packages/mock-data/
+COPY packages/usage/package.json ./packages/usage/
 COPY apps/competitor-spy/package.json ./apps/competitor-spy/
 RUN pnpm install --frozen-lockfile=false
 

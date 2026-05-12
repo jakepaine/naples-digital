@@ -152,6 +152,7 @@ export async function syncCreator(args: {
     apifyToken,
     handle: (creator as any).handle,
     maxReels: 12,
+    tenantId: args.tenantId,
   });
 
   const errors: string[] = [];

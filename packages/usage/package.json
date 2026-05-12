@@ -16,7 +16,8 @@
     "./snapshot": "./lib/snapshot.ts",
     "./queries": "./lib/queries.ts",
     "./cap": "./lib/cap.ts",
-    "./stripe": "./lib/stripe.ts"
+    "./stripe": "./lib/stripe.ts",
+    "./apify-record": "./lib/apify-record.ts"
   },
   "dependencies": {
     "@naples/db": "workspace:*"

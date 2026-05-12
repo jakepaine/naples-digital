@@ -45,6 +45,7 @@ export async function POST(
       apiKey,
       params: job.params,
       maxLeads: 1000,
+      tenantId: tenant.id,
     });
     if (outcome.error && outcome.fetched.length === 0) {
       await updateRun({

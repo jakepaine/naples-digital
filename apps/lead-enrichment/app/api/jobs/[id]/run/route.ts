@@ -92,6 +92,7 @@ export async function POST(
           apiKeys,
           priority: job.source_priority,
           threshold: job.confidence_threshold,
+          tenantId: tenant.id,
         },
       );
       // Persist every per-source attempt for the audit trail.

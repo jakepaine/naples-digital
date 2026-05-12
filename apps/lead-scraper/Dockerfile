@@ -9,6 +9,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/mock-data/package.json ./packages/mock-data/
 COPY packages/db/package.json ./packages/db/
+COPY packages/usage/package.json ./packages/usage/
 COPY apps/lead-scraper/package.json ./apps/lead-scraper/
 RUN pnpm install --frozen-lockfile=false
 

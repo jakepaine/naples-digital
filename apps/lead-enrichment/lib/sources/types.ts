@@ -65,6 +65,8 @@ export interface EnrichmentSource {
   enrich(args: {
     apiKey?: string | null;
     input: EnrichmentInput;
+    /** Tenant invoking the enrichment — enables per-tenant usage attribution for vendors like Apify. */
+    tenantId?: string;
   }): Promise<EnrichmentResult>;
 }
 

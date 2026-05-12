@@ -2,6 +2,8 @@
 // normalises the dataset into RawScrapedLead. Caller passes:
 //   params.actor_id  — e.g. "compass/google-maps-scraper"
 //   params.input     — actor-specific input object
+//   ctx.tenantId     — present when called from the route handler;
+//                      enables per-tenant usage attribution.
 //
 // Common actors:
 //   - compass/google-maps-scraper        local-business directories
@@ -11,6 +13,7 @@
 // Reuses the same Apify pattern as competitor-spy/lib/apify.ts.
 
 import { ScrapeSource, ScrapeOutcome, RawScrapedLead } from "./types";
+import { recordApifyRun, extractApifyRunId } from "@naples/usage";
 
 const RUN_TIMEOUT_MS = 90_000;
 
@@ -20,7 +23,7 @@ export const apifySource: ScrapeSource = {
   isConfigured({ apiKey }) {
     return !!apiKey;
   },
-  async scrape({ apiKey, params, maxLeads }) {
+  async scrape({ apiKey, params, maxLeads, tenantId }) {
     if (!apiKey) return stubOutcome(maxLeads, params);
 
     const actorId = String((params as any).actor_id ?? "").trim();
@@ -42,6 +45,16 @@ export const apifySource: ScrapeSource = {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(input),
       });
+      // Tag the run for usage attribution. Best-effort — silent on failure.
+      const apifyRunId = extractApifyRunId(res.headers);
+      if (apifyRunId && tenantId) {
+        await recordApifyRun({
+          tenantId,
+          apifyRunId,
+          actorId,
+          sourceApp: "lead-scraper",
+        }).catch(() => null);
+      }
       if (!res.ok) {
         return {
           fetched: [],

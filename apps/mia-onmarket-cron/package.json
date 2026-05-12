@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@naples/db": "workspace:*",
+    "@naples/usage": "workspace:*",
     "@supabase/supabase-js": "^2.45.4",
     "tsx": "^4.19.0"
   },

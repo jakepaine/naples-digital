@@ -66,14 +66,14 @@ async function tick() {
   for (const market of criteria.markets) {
     console.log(`[mia-onmarket-cron] scraping ${market.metro}…`);
     try {
-      const lp = await scrapeLoopnet(token, { metros: [market.metro], states: market.states });
+      const lp = await scrapeLoopnet(token, { metros: [market.metro], states: market.states, tenantId: tenant.id });
       console.log(`[mia-onmarket-cron]   loopnet: ${lp.length} raw listings`);
       allListings.push(...lp);
     } catch (e) {
       console.error(`[mia-onmarket-cron]   loopnet failed:`, e instanceof Error ? e.message : e);
     }
     try {
-      const cx = await scrapeCrexi(token, { metros: [market.metro], states: market.states });
+      const cx = await scrapeCrexi(token, { metros: [market.metro], states: market.states, tenantId: tenant.id });
       console.log(`[mia-onmarket-cron]   crexi: ${cx.length} raw listings`);
       allListings.push(...cx);
     } catch (e) {

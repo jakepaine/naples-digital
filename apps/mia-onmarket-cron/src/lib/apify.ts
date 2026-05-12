@@ -5,11 +5,14 @@
 // scrape with a logged warning rather than crashing the loop.
 
 import { getTenantSecret } from "@naples/db";
+import { recordApifyRun } from "@naples/usage";
 
 export type ApifyRunOptions = {
   actorId: string; // e.g. 'epctex/loopnet-scraper' or whatever Apify actor we use
   input: Record<string, unknown>;
   timeoutSeconds?: number; // bound how long to wait
+  /** Tenant invoking the run — enables per-tenant usage attribution. */
+  tenantId?: string;
 };
 
 export type RawListing = {
@@ -60,6 +63,14 @@ export async function runActor(
   const runId = startJson?.data?.id;
   const datasetId = startJson?.data?.defaultDatasetId;
   if (!runId || !datasetId) throw new Error("apify response missing run id or dataset id");
+  if (opts.tenantId) {
+    await recordApifyRun({
+      tenantId: opts.tenantId,
+      apifyRunId: runId,
+      actorId: opts.actorId,
+      sourceApp: "mia-onmarket-cron",
+    }).catch(() => null);
+  }
 
   // Poll until complete or timeout
   const deadline = Date.now() + (opts.timeoutSeconds ?? 300) * 1000;
@@ -90,7 +101,7 @@ export async function runActor(
 const LOOPNET_ACTOR = "memo23/loopnet-scraper-ppe";
 const CREXI_ACTOR = "powerai/crexi-listing-scraper";
 
-export async function scrapeLoopnet(token: string, criteria: { metros: string[]; states: string[] }): Promise<RawListing[]> {
+export async function scrapeLoopnet(token: string, criteria: { metros: string[]; states: string[]; tenantId?: string }): Promise<RawListing[]> {
   // memo23 actor accepts startUrls or keyword search. We feed it constructed
   // LoopNet search URLs for multifamily for-sale in each metro. Actor returns
   // a flat list of listings.
@@ -106,6 +117,7 @@ export async function scrapeLoopnet(token: string, criteria: { metros: string[];
         proxyConfiguration: { useApifyProxy: true },
       },
       timeoutSeconds: 600,
+      tenantId: criteria.tenantId,
     });
     return items.map((raw) => normalizeLoopnetItem(raw));
   } catch (e) {
@@ -114,7 +126,7 @@ export async function scrapeLoopnet(token: string, criteria: { metros: string[];
   }
 }
 
-export async function scrapeCrexi(token: string, criteria: { metros: string[]; states: string[] }): Promise<RawListing[]> {
+export async function scrapeCrexi(token: string, criteria: { metros: string[]; states: string[]; tenantId?: string }): Promise<RawListing[]> {
   // powerai/crexi-listing-scraper accepts search URLs or terms.
   try {
     const items = await runActor(token, {
@@ -129,6 +141,7 @@ export async function scrapeCrexi(token: string, criteria: { metros: string[]; s
         proxyConfiguration: { useApifyProxy: true },
       },
       timeoutSeconds: 600,
+      tenantId: criteria.tenantId,
     });
     return items.map((raw) => normalizeCrexiItem(raw));
   } catch (e) {

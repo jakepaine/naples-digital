@@ -40,6 +40,8 @@ export interface ChainContext {
   apiKeys: Partial<Record<EnrichmentSourceKey, string | null>>;
   priority: EnrichmentSourceKey[];
   threshold: number;
+  /** Tenant invoking the chain — threaded down to sources that report usage. */
+  tenantId?: string;
 }
 
 export async function runChain(
@@ -57,6 +59,7 @@ export async function runChain(
     const result = await source.enrich({
       apiKey: ctx.apiKeys[key] ?? null,
       input: working,
+      tenantId: ctx.tenantId,
     });
     results.push(result);
 
@@ -106,6 +109,7 @@ export async function runChain(
       const result = await source.enrich({
         apiKey: ctx.apiKeys[key] ?? null,
         input: working,
+        tenantId: ctx.tenantId,
       });
       results.push(result);
       if (
